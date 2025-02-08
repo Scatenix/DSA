@@ -1,6 +1,10 @@
 package hashing
 
-import "testing"
+import (
+	perf "dsa"
+	"testing"
+	"time"
+)
 
 func TestSha256Simple(t *testing.T) {
 	want := "test-sha"
@@ -25,10 +29,13 @@ func TestSha256Table(t *testing.T) {
 		{"hashing äöü", args{"äöü"}, "test-sha"},
 	}
 	for _, tt := range tests {
+		startt := time.Now()
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Sha256(tt.args.input); got != tt.want {
 				t.Errorf("Sha256() = %v, want %v", got, tt.want)
 			}
 		})
+		perf.TimeTracker(startt, tt.name)
+		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 }
