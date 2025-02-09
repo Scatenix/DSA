@@ -2,6 +2,7 @@ package linkedList
 
 import (
 	"dsa/util/sugar"
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -20,7 +21,7 @@ func ll[T any](vals []T) *LinkedList[T] {
 	}
 
 	node := &Node[T]{vals[0], nil}
-	ll := &LinkedList[T]{node, nil, len(vals)}
+	ll := &LinkedList[T]{node, nil, uint(len(vals))}
 
 	for i := 1; i < len(vals); i++ {
 		newNode := &Node[T]{vals[i], nil}
@@ -38,7 +39,7 @@ func node[T any](val T, next *Node[T]) *Node[T] {
 
 func TestLinkedList_Get(t *testing.T) {
 	type args struct {
-		i int
+		i uint
 	}
 	type testCase[T any] struct {
 		name               string
@@ -50,42 +51,48 @@ func TestLinkedList_Get(t *testing.T) {
 	}
 	ints := []int{1, 2, 3, 4, 5}
 	tests := []testCase[*int]{
-		{"emtpy linkedList",
+		{
+			"emtpy linkedList",
 			ll[*int]([]*int{}),
 			args{3},
 			ll[*int]([]*int{}),
 			nil,
 			false,
 		},
-		{"populated linkedList out of bounds",
+		{
+			"populated linkedList out of bounds",
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			args{10},
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			nil,
 			false,
 		},
-		{"head value is nil",
+		{
+			"head value is nil",
 			ll[*int]([]*int{nil}),
 			args{0},
 			ll[*int]([]*int{nil}),
 			nil,
 			true,
 		},
-		{"populated linkedList i at beginning",
+		{
+			"populated linkedList i at beginning",
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			args{0},
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			&ints[0],
 			true,
 		},
-		{"populated linkedList i at end",
+		{
+			"populated linkedList i at end",
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			args{4},
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			&ints[4],
 			true,
 		},
-		{"populated linkedList beginning < i < end ",
+		{
+			"populated linkedList beginning < i < end ",
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			args{2},
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
@@ -113,7 +120,7 @@ func TestLinkedList_Get(t *testing.T) {
 
 func TestLinkedList_GetNode(t *testing.T) {
 	type args struct {
-		i int
+		i uint
 	}
 	type testCase[T any] struct {
 		name               string
@@ -124,44 +131,58 @@ func TestLinkedList_GetNode(t *testing.T) {
 		wantBool           bool
 	}
 	tests := []testCase[int]{
-		{"emtpy linkedList",
+		{
+			"emtpy linkedList",
 			ll[int]([]int{}),
 			args{3},
 			ll[int]([]int{}),
 			nil,
 			false,
 		},
-		{"populated linkedList out of bounds",
+		{
+			"populated linkedList out of bounds",
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			args{10},
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			nil,
 			false,
 		},
+		{
+			"populated linkedList out of bounds by one",
+			ll[int]([]int{1, 2, 3, 4, 5}),
+			args{5},
+			ll[int]([]int{1, 2, 3, 4, 5}),
+			nil,
+			false,
+		},
 		// This test case is cheated, because an linkedList[int] cannot have a Node with a value of nil,
 		// but for this test case, it still gets the point.
-		{"head value is nil",
+		{
+			"head value is nil",
 			ll[int](nil),
 			args{0},
 			ll[int](nil),
 			&Node[int]{nil, nil},
 			true,
 		},
-		{"populated linkedList i at beginning",
+		{
+			"populated linkedList i at beginning",
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			args{0},
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			ll[int]([]int{1, 2, 3, 4, 5}).Head,
 			true,
 		},
-		{"populated linkedList i at end",
+		{
+			"populated linkedList i at end",
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			args{4},
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			ll[int]([]int{1, 2, 3, 4, 5}).Tail,
 			true,
 		},
-		{"populated linkedList beginning < i < end ",
+		{
+			"populated linkedList beginning < i < end",
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			args{2},
 			ll[int]([]int{1, 2, 3, 4, 5}),
@@ -444,12 +465,87 @@ func TestLinkedList_PushFront(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		println()
 		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(t, tt.name)
 			if gotNode := tt.existingLinkedList.PushFront(tt.args.val); !reflect.DeepEqual(gotNode, tt.wantNode) {
 				t.Errorf("PushFront() = %v, wantNode %v", gotNode, tt.wantNode)
 			}
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
 				t.Errorf("Pop() actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
+			}
+		})
+	}
+}
+
+func TestLinkedList_Insert(t *testing.T) {
+	type args[T any] struct {
+		val T
+		i   uint
+	}
+	type testCase[T any] struct {
+		name               string
+		existingLinkedList *LinkedList[T]
+		args               args[T]
+		wantLL             *LinkedList[T]
+		wantNode           *Node[T]
+		wantError          error
+	}
+	tests := []testCase[int]{
+		{
+			"insert to empty linkedList",
+			ll[int]([]int{}),
+			args[int]{10, 0},
+			ll[int]([]int{10}),
+			node[int](10, nil),
+			nil,
+		},
+		{
+			"insert to populated LL at i = 0",
+			ll[int]([]int{1, 2, 3, 4}),
+			args[int]{10, 0},
+			ll[int]([]int{10, 1, 2, 3, 4}),
+			ll[int]([]int{10, 1, 2, 3, 4}).Head,
+			nil,
+		},
+		{
+			"insert to populated LL at 0 < i < ll.Size - 1",
+			ll[int]([]int{1, 2, 3, 4}),
+			args[int]{10, 2},
+			ll[int]([]int{1, 2, 10, 3, 4}),
+			ll[int]([]int{1, 2, 10, 3, 4}).Head.Next.Next,
+			nil,
+		},
+		{
+			"insert to populated LL at i = ll.Size",
+			ll[int]([]int{1, 2, 3, 4}),
+			args[int]{10, 4},
+			ll[int]([]int{1, 2, 3, 4, 10}),
+			ll[int]([]int{1, 2, 3, 4, 10}).Tail,
+			nil,
+		},
+		{
+			"insert out of bounds",
+			ll[int]([]int{1, 2, 3, 4}),
+			args[int]{10, 10},
+			ll[int]([]int{1, 2, 3, 4}),
+			nil,
+			errors.New("index out of range"),
+		},
+	}
+	for _, tt := range tests {
+		println()
+		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(t, tt.name)
+			gotNode, gotError := tt.existingLinkedList.Insert(tt.args.val, tt.args.i)
+			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
+				t.Errorf("Pop() actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
+			}
+			if !reflect.DeepEqual(gotNode, tt.wantNode) {
+				t.Errorf("Insert() gotNode = %v, want %v", gotNode, tt.wantNode)
+			}
+			if !reflect.DeepEqual(gotError, tt.wantError) {
+				t.Errorf("Insert() gotError = %v, want %v", gotError, tt.wantError)
 			}
 		})
 	}

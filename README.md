@@ -15,6 +15,8 @@ There is no main package in this repository.
 
 ## Testing
 
+The goal of this repo, next to learning DSA, is to do Test-Driven-Development.
+
 Every datastructure and algorithm has their own test files.
 
 Test individually by cd'ing into their directory and `go test`

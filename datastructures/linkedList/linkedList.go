@@ -1,5 +1,7 @@
 package linkedList
 
+import "errors"
+
 type Node[T any] struct {
 	Value any
 	Next  *Node[T]
@@ -8,7 +10,7 @@ type Node[T any] struct {
 type LinkedList[T any] struct {
 	Head *Node[T]
 	Tail *Node[T]
-	Size int
+	Size uint
 }
 
 // NewLinkedList creates a new linkedList with n elements of type T.
@@ -33,7 +35,7 @@ func (l *LinkedList[T]) IsEmpty() bool {
 // Get the value at i.
 //
 // returns false if the is no Node at i.
-func (l *LinkedList[T]) Get(i int) (val T, success bool) {
+func (l *LinkedList[T]) Get(i uint) (val T, success bool) {
 	node, status := l.GetNode(i)
 
 	if !status {
@@ -46,19 +48,16 @@ func (l *LinkedList[T]) Get(i int) (val T, success bool) {
 // GetNode at i.
 //
 // Returns the Node at i, nil if nothing was found and false if i is out of bounds.
-func (l *LinkedList[T]) GetNode(i int) (node *Node[T], success bool) {
+func (l *LinkedList[T]) GetNode(i uint) (node *Node[T], success bool) {
 	if i == l.Size-1 {
 		return l.Tail, true
 	}
-	curNode := l.Head
-	for j := 0; j < i; j++ {
-		if curNode == nil {
-			return nil, false
-		}
-		curNode = curNode.Next
-	}
-	if curNode == nil {
+	if i >= l.Size {
 		return nil, false
+	}
+	curNode := l.Head
+	for j := uint(0); j < i; j++ {
+		curNode = curNode.Next
 	}
 	return curNode, true
 }
@@ -122,15 +121,46 @@ func (l *LinkedList[T]) PushFront(val T) *Node[T] {
 // Insert the value at i.
 //
 // Returns the newely created Node
-// Returns false if i is out of bounds.
-func (l *LinkedList[T]) Insert(val T, i int) (node Node[T], success bool) {
-	return Node[T]{nil, nil}, false
+// Returns error if i is out of range.
+func (l *LinkedList[T]) Insert(val T, i uint) (node *Node[T], err error) {
+	if i > l.Size {
+		return nil, errors.New("index out of range")
+	}
+
+	if l.IsEmpty() {
+		newNode := Node[T]{val, nil}
+		l.Head = &newNode
+		l.Tail = &newNode
+		l.Size++
+		return &newNode, nil
+	}
+	l.Size++
+	if i == 0 {
+		nextNode, _ := l.GetNode(0)
+		newNode := Node[T]{val, nextNode}
+		l.Head = &newNode
+		return &newNode, nil
+	}
+
+	prevNode, _ := l.GetNode(i - 1)
+	nextNode := prevNode.Next
+	newNode := Node[T]{val, nextNode}
+	prevNode.Next = &newNode
+
+	if i == l.Size-1 {
+		l.Tail = &newNode
+	}
+
+	return &newNode, nil
 }
 
 // Remove the Node at i.
 //
 // Returns the value at i, nil if i is out of bounds and true if a Node at i could be found and deleted.
-func (l *LinkedList[T]) Remove(i int) (val T, success bool) {
+func (l *LinkedList[T]) Remove(i int) (val T, err error) {
 	var value T
-	return value, false
+	return value, nil
 }
+
+// TODO: replace success bools with error types
+// TODO: write test for Remove(i int)
