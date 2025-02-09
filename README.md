@@ -22,3 +22,10 @@ Test individually by cd'ing into their directory and `go test`
 Or test everything from the root with `go test ./...`
 
 Get test coverage with `go test -cover ./...`
+
+## Testing additions: Sugar
+
+This repository also includes the sugar library, which adds some coloring, time and memory metrics to testing.
+Needs the performance and color library alongside.
+
+All can be found in the DSA/util directory.

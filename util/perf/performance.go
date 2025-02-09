@@ -1,11 +1,15 @@
 package perf
 
 import (
+	"dsa/util/color"
 	"fmt"
 	"runtime"
 	"strconv"
 	"time"
 )
+
+var ColorTime = color.Blue
+var ColorMem = color.Cyan
 
 const (
 	Byte uint64 = 1
@@ -52,13 +56,14 @@ func PrintMemUsage(memMagnitude uint64, name string) {
 	n := nameOfByte(memMagnitude)
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	out := "%s: " +
+	out := "%s[ %s ] " +
 		"Alloc = %g " + n +
 		" | TotalAlloc = %g " + n +
 		" | Sys = %g " + n +
 		" | NumGC = %v\n"
 	fmt.Printf(
 		out,
+		ColorMem,
 		name,
 		float64(m.Alloc)/float64(memMagnitude),
 		float64(m.TotalAlloc)/float64(memMagnitude),
@@ -71,5 +76,6 @@ func PrintMemUsage(memMagnitude uint64, name string) {
 // usage: defer aocperf.TimeTracker(time.Now(), "Main")
 func TimeTracker(start time.Time, name string) {
 	elapsed := time.Since(start)
-	fmt.Printf("%s took %s\n", name, elapsed)
+	output := fmt.Sprintf("%s[ %s ] took %s\n", ColorTime, name, elapsed)
+	print(output)
 }

@@ -1,10 +1,9 @@
 package linkedList
 
 import (
-	perf "dsa"
+	"dsa/util/sugar"
 	"reflect"
 	"testing"
-	"time"
 )
 
 //func TestLinkedList_Get(t *testing.T) {
@@ -117,7 +116,6 @@ func TestLinkedList_Push(t *testing.T) {
 		{"list: push emtpy list to emtpy ll",
 			ll[[]string]([][]string{}),
 			args[[]string]{make([]string, 0)},
-			//ll[[]string](make([][]string, 0)),
 			ll[[]string](emptyListOfLists),
 		},
 		{"list: push some list to emtpy ll",
@@ -152,8 +150,9 @@ func TestLinkedList_Push(t *testing.T) {
 	}
 
 	for _, tt := range intTests {
-		startT := time.Now()
+		println()
 		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(tt.name, t)
 			wantNode := node[int](tt.args.val, nil)
 
 			tt.existingLinkedList.Push(tt.args.val)
@@ -161,12 +160,11 @@ func TestLinkedList_Push(t *testing.T) {
 				t.Errorf("NewLinkedList() = %v, wantLL %v, wantNode %v", tt.existingLinkedList, tt.wantLL, wantNode)
 			}
 		})
-		perf.TimeTracker(startT, tt.name)
-		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 	for _, tt := range listTests {
-		startT := time.Now()
+		println()
 		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(tt.name, t)
 			wantNode := node[[]string](tt.args.val, nil)
 
 			tt.existingLinkedList.Push(tt.args.val)
@@ -174,12 +172,11 @@ func TestLinkedList_Push(t *testing.T) {
 				t.Errorf("NewLinkedList() = %v, wantLL %v, wantNode %v", tt.existingLinkedList, tt.wantLL, wantNode)
 			}
 		})
-		perf.TimeTracker(startT, tt.name)
-		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 	for _, tt := range pointerTests {
-		startT := time.Now()
+		println()
 		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(tt.name, t)
 			wantNode := node[*string](tt.args.val, nil)
 
 			tt.existingLinkedList.Push(tt.args.val)
@@ -187,8 +184,6 @@ func TestLinkedList_Push(t *testing.T) {
 				t.Errorf("NewLinkedList() = %v, wantLL %v, wantNode %v", tt.existingLinkedList, tt.wantLL, wantNode)
 			}
 		})
-		perf.TimeTracker(startT, tt.name)
-		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 }
 
@@ -245,14 +240,14 @@ func TestNewLinkedList(t *testing.T) {
 		{"5 items", args[int]{[]int{1, 2, 3, 99, 1001}}, ll[int]([]int{1, 2, 3, 99, 1001})},
 	}
 	for _, tt := range tests {
-		startT := time.Now()
+		println()
 		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(tt.name, t)
+			//t.Skip()
 			if got := NewLinkedList(tt.args.elems...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewLinkedList() = %v, wantLL %v", got, tt.want)
 			}
 		})
-		perf.TimeTracker(startT, tt.name)
-		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 }
 

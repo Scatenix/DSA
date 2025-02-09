@@ -1,7 +1,7 @@
 package hashing
 
 import (
-	perf "dsa"
+	"dsa/util/perf"
 	"testing"
 	"time"
 )
