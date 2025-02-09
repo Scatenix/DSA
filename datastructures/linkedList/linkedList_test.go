@@ -1,8 +1,10 @@
 package linkedList
 
 import (
+	perf "dsa"
 	"reflect"
 	"testing"
+	"time"
 )
 
 //func TestLinkedList_Get(t *testing.T) {
@@ -13,7 +15,7 @@ import (
 //		name  string
 //		l     LinkedList[T]
 //		args  args
-//		want  T
+//		wantLL  T
 //		want1 bool
 //	}
 //	tests := []testCase[ /* TODO: Insert concrete types here */ ]{
@@ -22,11 +24,11 @@ import (
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
 //			got, got1 := tt.l.Get(tt.args.i)
-//			if !reflect.DeepEqual(got, tt.want) {
-//				t.Errorf("Get() got = %v, want %v", got, tt.want)
+//			if !reflect.DeepEqual(got, tt.wantLL) {
+//				t.Errorf("Get() got = %v, wantLL %v", got, tt.wantLL)
 //			}
 //			if got1 != tt.want1 {
-//				t.Errorf("Get() got1 = %v, want %v", got1, tt.want1)
+//				t.Errorf("Get() got1 = %v, wantLL %v", got1, tt.want1)
 //			}
 //		})
 //	}
@@ -56,15 +58,15 @@ import (
 //	type testCase[T any] struct {
 //		name string
 //		l    LinkedList[T]
-//		want bool
+//		wantLL bool
 //	}
 //	tests := []testCase[ /* TODO: Insert concrete types here */ ]{
 //		// TODO: Add test cases.
 //	}
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
-//			if got := tt.l.IsEmpty(); got != tt.want {
-//				t.Errorf("IsEmpty() = %v, want %v", got, tt.want)
+//			if got := tt.l.IsEmpty(); got != tt.wantLL {
+//				t.Errorf("IsEmpty() = %v, wantLL %v", got, tt.wantLL)
 //			}
 //		})
 //	}
@@ -74,7 +76,7 @@ import (
 //	type testCase[T any] struct {
 //		name  string
 //		l     LinkedList[T]
-//		want  T
+//		wantLL  T
 //		want1 bool
 //	}
 //	tests := []testCase[ /* TODO: Insert concrete types here */ ]{
@@ -83,20 +85,17 @@ import (
 //	for _, tt := range tests {
 //		t.Run(tt.name, func(t *testing.T) {
 //			got, got1 := tt.l.Pop()
-//			if !reflect.DeepEqual(got, tt.want) {
-//				t.Errorf("Pop() got = %v, want %v", got, tt.want)
+//			if !reflect.DeepEqual(got, tt.wantLL) {
+//				t.Errorf("Pop() got = %v, wantLL %v", got, tt.wantLL)
 //			}
 //			if got1 != tt.want1 {
-//				t.Errorf("Pop() got1 = %v, want %v", got1, tt.want1)
+//				t.Errorf("Pop() got1 = %v, wantLL %v", got1, tt.want1)
 //			}
 //		})
 //	}
 //}
 
 func TestLinkedList_Push(t *testing.T) {
-	emptyListOfLists := make([][]string, 1) // Create an outer list with one item
-	emptyListOfLists[0] = nil
-
 	type args[T any] struct {
 		val T
 	}
@@ -104,18 +103,22 @@ func TestLinkedList_Push(t *testing.T) {
 		name               string
 		existingLinkedList *LinkedList[T]
 		args               args[T]
-		want               *LinkedList[T]
+		wantLL             *LinkedList[T]
 	}
+
 	intTests := []testCase[int]{
 		{"int: push int to empty ll", ll[int]([]int{}), args[int]{1}, ll[int]([]int{1})},
 		{"int: push int to existing ll", ll[int]([]int{1}), args[int]{2}, ll[int]([]int{1, 2})},
 	}
 
+	emptyListOfLists := make([][]string, 1)
+	emptyListOfLists[0] = make([]string, 0)
 	listTests := []testCase[[]string]{
 		{"list: push emtpy list to emtpy ll",
 			ll[[]string]([][]string{}),
 			args[[]string]{make([]string, 0)},
-			ll[[]string](make([][]string, 1)),
+			//ll[[]string](make([][]string, 0)),
+			ll[[]string](emptyListOfLists),
 		},
 		{"list: push some list to emtpy ll",
 			ll[[]string]([][]string{}),
@@ -125,7 +128,7 @@ func TestLinkedList_Push(t *testing.T) {
 		{"list: push empty list to existing ll",
 			ll[[]string]([][]string{{"first"}, {"second"}}),
 			args[[]string]{make([]string, 0)},
-			ll[[]string]([][]string{{"first"}, {"second"}}),
+			ll[[]string]([][]string{{"first"}, {"second"}, make([]string, 0)}),
 		},
 		{"list: push some list to existing ll",
 			ll[[]string]([][]string{{"first"}, {"second"}, {"third"}}),
@@ -139,7 +142,7 @@ func TestLinkedList_Push(t *testing.T) {
 		{"pointer: push nil to emtpy ll",
 			ll[*string]([]*string{}),
 			args[*string]{nil},
-			ll[*string](nil),
+			ll[*string]([]*string{nil}),
 		},
 		{"pointer: push nil to existing ll",
 			ll[*string]([]*string{&stringPointer}),
@@ -149,28 +152,43 @@ func TestLinkedList_Push(t *testing.T) {
 	}
 
 	for _, tt := range intTests {
+		startT := time.Now()
 		t.Run(tt.name, func(t *testing.T) {
+			wantNode := node[int](tt.args.val, nil)
+
 			tt.existingLinkedList.Push(tt.args.val)
-			if !reflect.DeepEqual(tt.existingLinkedList, tt.want) {
-				t.Errorf("NewLinkedList() = %v, want %v", tt.existingLinkedList, tt.want)
+			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
+				t.Errorf("NewLinkedList() = %v, wantLL %v, wantNode %v", tt.existingLinkedList, tt.wantLL, wantNode)
 			}
 		})
+		perf.TimeTracker(startT, tt.name)
+		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 	for _, tt := range listTests {
+		startT := time.Now()
 		t.Run(tt.name, func(t *testing.T) {
+			wantNode := node[[]string](tt.args.val, nil)
+
 			tt.existingLinkedList.Push(tt.args.val)
-			if !reflect.DeepEqual(tt.existingLinkedList, tt.want) {
-				t.Errorf("NewLinkedList() = %v, want %v", tt.existingLinkedList, tt.want)
+			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
+				t.Errorf("NewLinkedList() = %v, wantLL %v, wantNode %v", tt.existingLinkedList, tt.wantLL, wantNode)
 			}
 		})
+		perf.TimeTracker(startT, tt.name)
+		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 	for _, tt := range pointerTests {
+		startT := time.Now()
 		t.Run(tt.name, func(t *testing.T) {
+			wantNode := node[*string](tt.args.val, nil)
+
 			tt.existingLinkedList.Push(tt.args.val)
-			if !reflect.DeepEqual(tt.existingLinkedList, tt.want) {
-				t.Errorf("NewLinkedList() = %v, want %v", tt.existingLinkedList, tt.want)
+			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
+				t.Errorf("NewLinkedList() = %v, wantLL %v, wantNode %v", tt.existingLinkedList, tt.wantLL, wantNode)
 			}
 		})
+		perf.TimeTracker(startT, tt.name)
+		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 }
 
@@ -227,17 +245,28 @@ func TestNewLinkedList(t *testing.T) {
 		{"5 items", args[int]{[]int{1, 2, 3, 99, 1001}}, ll[int]([]int{1, 2, 3, 99, 1001})},
 	}
 	for _, tt := range tests {
+		startT := time.Now()
 		t.Run(tt.name, func(t *testing.T) {
 			if got := NewLinkedList(tt.args.elems...); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewLinkedList() = %v, want %v", got, tt.want)
+				t.Errorf("NewLinkedList() = %v, wantLL %v", got, tt.want)
 			}
 		})
+		perf.TimeTracker(startT, tt.name)
+		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 }
 
 func ll[T any](vals []T) *LinkedList[T] {
-	if len(vals) == 0 {
-		return &LinkedList[T]{Head: nil, Tail: nil, size: 0}
+	// Hint: if valls is nil then len(vals) == 0 is true
+	// This means, the vals == nil check MUST be before the check for an empty list
+	if vals == nil {
+		return &LinkedList[T]{
+			Head: &Node[T]{nil, nil},
+			Tail: &Node[T]{nil, nil},
+			Size: 1,
+		}
+	} else if len(vals) == 0 {
+		return &LinkedList[T]{Head: nil, Tail: nil, Size: 0}
 	}
 
 	node := &Node[T]{vals[0], nil}
@@ -251,4 +280,8 @@ func ll[T any](vals []T) *LinkedList[T] {
 
 	ll.Tail = node
 	return ll
+}
+
+func node[T any](val T, next *Node[T]) *Node[T] {
+	return &Node[T]{val, next}
 }

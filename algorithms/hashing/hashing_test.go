@@ -29,13 +29,13 @@ func TestSha256Table(t *testing.T) {
 		{"hashing äöü", args{"äöü"}, "test-sha"},
 	}
 	for _, tt := range tests {
-		startt := time.Now()
+		startT := time.Now()
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Sha256(tt.args.input); got != tt.want {
 				t.Errorf("Sha256() = %v, want %v", got, tt.want)
 			}
 		})
-		perf.TimeTracker(startt, tt.name)
+		perf.TimeTracker(startT, tt.name)
 		perf.PrintMemUsage(perf.KB, tt.name)
 	}
 }
