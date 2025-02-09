@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// TODO: There is a bug in sugar which shows the test as PASSED when a test crashed mid execution
+
 var ColoerTime = color.Blue
 var ColorMem = color.Cyan
 var ColorPassed = color.Green
@@ -18,7 +20,7 @@ var ColorSkipped = color.Yellow
 // Advise: Place a `println()` above the resting.Run() function
 //
 // Provides colored test results, runtime, memory usage
-func Shock(ttName string, t *testing.T) {
+func Shock(t *testing.T, ttName string) {
 	startT := time.Now()
 	print(ColoerTime + "TEST TIME ")
 	perf.TimeTracker(startT, ttName)
@@ -38,7 +40,7 @@ func Shock(ttName string, t *testing.T) {
 // Advise: Place a `println()` above the resting.Run() function
 //
 // Provides colored test results, runtime
-func Lite(ttName string, t *testing.T) {
+func Lite(t *testing.T, ttName string) {
 	startT := time.Now()
 	print(ColoerTime + "TEST TIME ")
 	perf.TimeTracker(startT, ttName)
