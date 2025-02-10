@@ -47,7 +47,7 @@ func TestLinkedList_Get(t *testing.T) {
 		args               args
 		wantLL             *LinkedList[T]
 		wantVal            T
-		wantBool           bool
+		wantErr            error
 	}
 	ints := []int{1, 2, 3, 4, 5}
 	tests := []testCase[*int]{
@@ -57,7 +57,7 @@ func TestLinkedList_Get(t *testing.T) {
 			args{3},
 			ll[*int]([]*int{}),
 			nil,
-			false,
+			errors.New("index out of range"),
 		},
 		{
 			"populated linkedList out of bounds",
@@ -65,7 +65,7 @@ func TestLinkedList_Get(t *testing.T) {
 			args{10},
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			nil,
-			false,
+			errors.New("index out of range"),
 		},
 		{
 			"head value is nil",
@@ -73,7 +73,7 @@ func TestLinkedList_Get(t *testing.T) {
 			args{0},
 			ll[*int]([]*int{nil}),
 			nil,
-			true,
+			nil,
 		},
 		{
 			"populated linkedList i at beginning",
@@ -81,7 +81,7 @@ func TestLinkedList_Get(t *testing.T) {
 			args{0},
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			&ints[0],
-			true,
+			nil,
 		},
 		{
 			"populated linkedList i at end",
@@ -89,7 +89,7 @@ func TestLinkedList_Get(t *testing.T) {
 			args{4},
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			&ints[4],
-			true,
+			nil,
 		},
 		{
 			"populated linkedList beginning < i < end ",
@@ -97,22 +97,22 @@ func TestLinkedList_Get(t *testing.T) {
 			args{2},
 			ll[*int]([]*int{&ints[0], &ints[1], &ints[2], &ints[3], &ints[4]}),
 			&ints[2],
-			true,
+			nil,
 		},
 	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			gotVal, gotBool := tt.existingLinkedList.Get(tt.args.i)
+			gotVal, gotErr := tt.existingLinkedList.Get(tt.args.i)
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
-				t.Errorf("Get() actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
+				t.Errorf("actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
 			}
 			if !reflect.DeepEqual(gotVal, tt.wantVal) {
 				t.Errorf("Get() gotVal = %v, wantVal %v", gotVal, tt.wantVal)
 			}
-			if gotBool != tt.wantBool {
-				t.Errorf("Get() gotBool = %v, wantBool %v", gotBool, tt.wantBool)
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("Get() gotErr = %v, wantErr %v", gotErr, tt.wantErr)
 			}
 		})
 	}
@@ -128,7 +128,7 @@ func TestLinkedList_GetNode(t *testing.T) {
 		args               args
 		wantLL             *LinkedList[T]
 		wantNode           *Node[T]
-		wantBool           bool
+		wantErr            error
 	}
 	tests := []testCase[int]{
 		{
@@ -137,7 +137,7 @@ func TestLinkedList_GetNode(t *testing.T) {
 			args{3},
 			ll[int]([]int{}),
 			nil,
-			false,
+			errors.New("index out of range"),
 		},
 		{
 			"populated linkedList out of bounds",
@@ -145,7 +145,7 @@ func TestLinkedList_GetNode(t *testing.T) {
 			args{10},
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			nil,
-			false,
+			errors.New("index out of range"),
 		},
 		{
 			"populated linkedList out of bounds by one",
@@ -153,7 +153,7 @@ func TestLinkedList_GetNode(t *testing.T) {
 			args{5},
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			nil,
-			false,
+			errors.New("index out of range"),
 		},
 		// This test case is cheated, because an linkedList[int] cannot have a Node with a value of nil,
 		// but for this test case, it still gets the point.
@@ -163,7 +163,7 @@ func TestLinkedList_GetNode(t *testing.T) {
 			args{0},
 			ll[int](nil),
 			&Node[int]{nil, nil},
-			true,
+			nil,
 		},
 		{
 			"populated linkedList i at beginning",
@@ -171,7 +171,7 @@ func TestLinkedList_GetNode(t *testing.T) {
 			args{0},
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			ll[int]([]int{1, 2, 3, 4, 5}).Head,
-			true,
+			nil,
 		},
 		{
 			"populated linkedList i at end",
@@ -179,7 +179,7 @@ func TestLinkedList_GetNode(t *testing.T) {
 			args{4},
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			ll[int]([]int{1, 2, 3, 4, 5}).Tail,
-			true,
+			nil,
 		},
 		{
 			"populated linkedList beginning < i < end",
@@ -187,22 +187,22 @@ func TestLinkedList_GetNode(t *testing.T) {
 			args{2},
 			ll[int]([]int{1, 2, 3, 4, 5}),
 			ll[int]([]int{1, 2, 3, 4, 5}).Head.Next.Next,
-			true,
+			nil,
 		},
 	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			gotNode, gotBool := tt.existingLinkedList.GetNode(tt.args.i)
+			gotNode, gotErr := tt.existingLinkedList.GetNode(tt.args.i)
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
-				t.Errorf("Get() actuall LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
+				t.Errorf("actuall LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
 			}
 			if !reflect.DeepEqual(gotNode, tt.wantNode) {
-				t.Errorf("Get() gotNode = %v, wantNode %v", gotNode, tt.wantNode)
+				t.Errorf("GetNode() gotNode = %v, wantNode %v", gotNode, tt.wantNode)
 			}
-			if gotBool != tt.wantBool {
-				t.Errorf("Get() gotBool = %v, wantBool %v", gotBool, tt.wantBool)
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("GetNode() gotErr = %v, wantErr %v", gotErr, tt.wantErr)
 			}
 		})
 	}
@@ -225,7 +225,7 @@ func TestLinkedList_IsEmpty(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
-				t.Errorf("Get() actuall LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
+				t.Errorf("actuall LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
 			}
 			if got := tt.existingLinkedList.IsEmpty(); got != tt.want {
 				t.Errorf("IsEmpty() = %v, want %v", got, tt.want)
@@ -240,7 +240,7 @@ func TestLinkedList_Pop(t *testing.T) {
 		existingLinkedList *LinkedList[T]
 		wantLL             *LinkedList[T]
 		wantVal            T
-		wantBool           bool
+		wantErr            error
 	}
 	values := []int{1, 2, 3}
 	tests := []testCase[*int]{
@@ -249,36 +249,36 @@ func TestLinkedList_Pop(t *testing.T) {
 			ll[*int]([]*int{}),
 			ll[*int]([]*int{}),
 			nil,
-			false,
+			errors.New("index out of range"),
 		},
 		{
 			"head value is nil",
 			ll[*int]([]*int{nil}),
 			ll[*int]([]*int{}),
 			nil,
-			true,
+			nil,
 		},
 		{
 			"populated linkedList",
 			ll[*int]([]*int{&values[0], &values[1], &values[2]}),
 			ll[*int]([]*int{&values[1], &values[2]}),
 			&values[0],
-			true,
+			nil,
 		},
 	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			gotVal, gotBool := tt.existingLinkedList.Pop()
+			gotVal, gotErr := tt.existingLinkedList.Pop()
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
-				t.Errorf("Pop() actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
+				t.Errorf("actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
 			}
 			if !reflect.DeepEqual(gotVal, tt.wantVal) {
 				t.Errorf("Pop() gotVal = %v, wantVal %v", gotVal, tt.wantVal)
 			}
-			if gotBool != tt.wantBool {
-				t.Errorf("Pop() gotBool = %v, wantVal %v", gotBool, tt.wantBool)
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("Pop() gotErr = %v, wantVal %v", gotErr, tt.wantErr)
 			}
 		})
 	}
@@ -472,7 +472,7 @@ func TestLinkedList_PushFront(t *testing.T) {
 				t.Errorf("PushFront() = %v, wantNode %v", gotNode, tt.wantNode)
 			}
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
-				t.Errorf("Pop() actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
+				t.Errorf("actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
 			}
 		})
 	}
@@ -489,7 +489,7 @@ func TestLinkedList_Insert(t *testing.T) {
 		args               args[T]
 		wantLL             *LinkedList[T]
 		wantNode           *Node[T]
-		wantError          error
+		wantErr            error
 	}
 	tests := []testCase[int]{
 		{
@@ -537,15 +537,95 @@ func TestLinkedList_Insert(t *testing.T) {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			gotNode, gotError := tt.existingLinkedList.Insert(tt.args.val, tt.args.i)
+			gotNode, gotErr := tt.existingLinkedList.Insert(tt.args.val, tt.args.i)
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
-				t.Errorf("Pop() actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
+				t.Errorf("actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
 			}
 			if !reflect.DeepEqual(gotNode, tt.wantNode) {
 				t.Errorf("Insert() gotNode = %v, want %v", gotNode, tt.wantNode)
 			}
-			if !reflect.DeepEqual(gotError, tt.wantError) {
-				t.Errorf("Insert() gotError = %v, want %v", gotError, tt.wantError)
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("Insert() gotErr = %v, want %v", gotErr, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestLinkedList_Remove(t *testing.T) {
+	type args struct {
+		i uint
+	}
+	type testCase[T any] struct {
+		name               string
+		existingLinkedList *LinkedList[T]
+		args               args
+		wantLL             *LinkedList[T]
+		wantVal            T
+		wantErr            error
+	}
+	tests := []testCase[int]{
+		{
+			"remove from empty linkedList",
+			ll[int]([]int{}),
+			args{0},
+			ll[int]([]int{}),
+			0,
+			errors.New("tried to remove from an empty list"),
+		},
+		{
+			"remove out of bounds",
+			ll[int]([]int{1, 2, 3}),
+			args{3},
+			ll[int]([]int{1, 2, 3}),
+			0,
+			errors.New("index out of range"),
+		},
+		{
+			"remove only item of list",
+			ll[int]([]int{1}),
+			args{0},
+			ll[int]([]int{}),
+			1,
+			nil,
+		},
+		{
+			"remove head of list",
+			ll[int]([]int{1, 2, 3}),
+			args{0},
+			ll[int]([]int{2, 3}),
+			1,
+			nil,
+		},
+		{
+			"remove tail of list",
+			ll[int]([]int{1, 2, 3}),
+			args{2},
+			ll[int]([]int{1, 2}),
+			3,
+			nil,
+		},
+		{
+			"remove middle of list",
+			ll[int]([]int{1, 2, 3}),
+			args{1},
+			ll[int]([]int{1, 3}),
+			2,
+			nil,
+		},
+	}
+	for _, tt := range tests {
+		println()
+		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(t, tt.name)
+			gotVal, gotErr := tt.existingLinkedList.Remove(tt.args.i)
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("Remove() gotError = %v, want %v", gotErr, tt.wantErr)
+			}
+			if !reflect.DeepEqual(gotVal, tt.wantVal) {
+				t.Errorf("Remove() gotVal = %v, want %v", gotVal, tt.wantVal)
+			}
+			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
+				t.Errorf("actual LL = %v, wantLL %v", tt.existingLinkedList, tt.wantLL)
 			}
 		})
 	}

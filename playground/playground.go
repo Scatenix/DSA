@@ -6,11 +6,12 @@ import (
 )
 
 func main() {
-	ll := linkedList.NewLinkedList[int]([]int{2, 6, 426}...)
+	ll := linkedList.NewLinkedList[int]([]int{2, 6, 426, 56}...)
 
-	ll.Insert(5, 3)
-	ll.Insert(1, 0)
-	ll.Insert(10, 2)
+	ll.Remove(3)
+	ll.Remove(1)
+	ll.Remove(0)
+	ll.Remove(0)
 
 	fmt.Println(*ll)
 }

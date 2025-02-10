@@ -2,6 +2,9 @@ package linkedList
 
 import "errors"
 
+var ErrIndexOutOfRange = errors.New("index out of range")
+var ErrAccessEmptyList = errors.New("tried to remove from an empty list")
+
 type Node[T any] struct {
 	Value any
 	Next  *Node[T]
@@ -34,41 +37,47 @@ func (l *LinkedList[T]) IsEmpty() bool {
 
 // Get the value at i.
 //
-// returns false if the is no Node at i.
-func (l *LinkedList[T]) Get(i uint) (val T, success bool) {
-	node, status := l.GetNode(i)
+// returns value at i.
+//
+// returns error if i is out of bounds.
+func (l *LinkedList[T]) Get(i uint) (val T, err error) {
+	node, err := l.GetNode(i)
 
-	if !status {
+	if err != nil {
 		var ret T
-		return ret, false
+		return ret, errors.New(err.Error())
 	}
-	return node.Value.(T), true
+	return node.Value.(T), nil
 }
 
 // GetNode at i.
 //
-// Returns the Node at i, nil if nothing was found and false if i is out of bounds.
-func (l *LinkedList[T]) GetNode(i uint) (node *Node[T], success bool) {
+// Returns the Node at i.
+//
+// Returns error if i is out of bounds.
+func (l *LinkedList[T]) GetNode(i uint) (node *Node[T], err error) {
 	if i == l.Size-1 {
-		return l.Tail, true
+		return l.Tail, nil
 	}
 	if i >= l.Size {
-		return nil, false
+		return nil, ErrIndexOutOfRange
 	}
 	curNode := l.Head
 	for j := uint(0); j < i; j++ {
 		curNode = curNode.Next
 	}
-	return curNode, true
+	return curNode, nil
 }
 
-// Pop removes the head of the list and returns its value.
+// Pop removes the head of the list.
 //
-// Returns false if there was no head
-func (l *LinkedList[T]) Pop() (val T, success bool) {
+// Returns its value.
+//
+// Returns error if there was no head.
+func (l *LinkedList[T]) Pop() (val T, err error) {
 	var ret T
 	if l.Head == nil {
-		return ret, false
+		return ret, ErrIndexOutOfRange
 	}
 
 	oldHead := l.Head
@@ -81,12 +90,12 @@ func (l *LinkedList[T]) Pop() (val T, success bool) {
 		l.Tail = nil
 	}
 
-	return ret, true
+	return ret, nil
 }
 
 // Push inserts the value at the end of the list as new tail.
 //
-// Returns the inserted Node
+// Returns the pushed Node.
 func (l *LinkedList[T]) Push(val T) *Node[T] {
 	newNode := &Node[T]{val, nil}
 
@@ -105,6 +114,8 @@ func (l *LinkedList[T]) Push(val T) *Node[T] {
 }
 
 // PushFront inserts the value at the front of the list as new head.
+//
+// Returns the pushed Node.
 func (l *LinkedList[T]) PushFront(val T) *Node[T] {
 	oldHead := l.Head
 	newHead := Node[T]{val, oldHead}
@@ -120,11 +131,11 @@ func (l *LinkedList[T]) PushFront(val T) *Node[T] {
 
 // Insert the value at i.
 //
-// Returns the newely created Node
+// Returns the new inserted Node.
 // Returns error if i is out of range.
 func (l *LinkedList[T]) Insert(val T, i uint) (node *Node[T], err error) {
 	if i > l.Size {
-		return nil, errors.New("index out of range")
+		return nil, ErrIndexOutOfRange
 	}
 
 	if l.IsEmpty() {
@@ -156,11 +167,40 @@ func (l *LinkedList[T]) Insert(val T, i uint) (node *Node[T], err error) {
 
 // Remove the Node at i.
 //
-// Returns the value at i, nil if i is out of bounds and true if a Node at i could be found and deleted.
-func (l *LinkedList[T]) Remove(i int) (val T, err error) {
+// Returns the removed value at i.
+//
+// Returns an error if list is empty or i >= l.Size.
+func (l *LinkedList[T]) Remove(i uint) (val T, err error) {
 	var value T
+	if l.IsEmpty() {
+		return value, ErrAccessEmptyList
+	} else if i >= l.Size {
+		return value, ErrIndexOutOfRange
+	}
+
+	if i == 0 {
+		value = l.Head.Value.(T)
+		newHead := l.Head.Next
+		l.Head = nil
+		l.Head = newHead
+		l.Size--
+		if l.Head == nil {
+			l.Tail = nil
+		}
+		return value, err
+	}
+	prevNode, _ := l.GetNode(i - 1)
+	oldNode := prevNode.Next
+	newNextNode := oldNode.Next
+
+	value = prevNode.Next.Value.(T)
+
+	oldNode = nil
+	prevNode.Next = newNextNode
+	if i == l.Size-1 {
+		l.Tail = prevNode
+	}
+
+	l.Size--
 	return value, nil
 }
-
-// TODO: replace success bools with error types
-// TODO: write test for Remove(i int)
