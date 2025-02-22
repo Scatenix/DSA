@@ -13,5 +13,5 @@ Dynamic resizing:
 
 func main() {
 	println("HashMap under construction!")
-	println(hash.Sha256("test"))
+	println(hash.Murmur3("test", 2))
 }

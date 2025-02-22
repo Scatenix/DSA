@@ -33,10 +33,6 @@ func ll[T any](vals []T) *LinkedList[T] {
 	return ll
 }
 
-func node[T any](val T, next *Node[T]) *Node[T] {
-	return &Node[T]{val, next}
-}
-
 func TestLinkedList_Get(t *testing.T) {
 	type args struct {
 		i uint
@@ -368,11 +364,9 @@ func TestLinkedList_Push(t *testing.T) {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			wantNode := node[int](tt.args.val, nil)
-
 			gotNode := tt.existingLinkedList.Push(tt.args.val)
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
-				t.Errorf("NewLinkedList() = %v, wantVal %v, wantNode %v", tt.existingLinkedList, tt.wantLL, wantNode)
+				t.Errorf("NewLinkedList() = %v, wantVal %v, wantNode %v", tt.existingLinkedList, tt.wantLL, tt.wantNode)
 			}
 			if !reflect.DeepEqual(gotNode, tt.wantNode) {
 				t.Errorf("Get() gotNode = %v, wantNode %v", gotNode, tt.wantNode)
@@ -383,11 +377,9 @@ func TestLinkedList_Push(t *testing.T) {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			wantNode := node[[]string](tt.args.val, nil)
-
 			gotNode := tt.existingLinkedList.Push(tt.args.val)
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
-				t.Errorf("NewLinkedList() = %v, wantVal %v, wantNode %v", tt.existingLinkedList, tt.wantLL, wantNode)
+				t.Errorf("NewLinkedList() = %v, wantVal %v, wantNode %v", tt.existingLinkedList, tt.wantLL, tt.wantNode)
 			}
 			if !reflect.DeepEqual(gotNode, tt.wantNode) {
 				t.Errorf("Get() gotNode = %v, wantNode %v", gotNode, tt.wantNode)
@@ -398,11 +390,9 @@ func TestLinkedList_Push(t *testing.T) {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			wantNode := node[*string](tt.args.val, nil)
-
 			gotNode := tt.existingLinkedList.Push(tt.args.val)
 			if !reflect.DeepEqual(tt.existingLinkedList, tt.wantLL) {
-				t.Errorf("NewLinkedList() = %v, wantVal %v, wantNode %v", tt.existingLinkedList, tt.wantLL, wantNode)
+				t.Errorf("NewLinkedList() = %v, wantVal %v, wantNode %v", tt.existingLinkedList, tt.wantLL, tt.wantNode)
 			}
 			if !reflect.DeepEqual(gotNode, tt.wantNode) {
 				t.Errorf("Get() gotNode = %v, wantNode %v", gotNode, tt.wantNode)
@@ -454,7 +444,7 @@ func TestLinkedList_PushFront(t *testing.T) {
 			ll[int]([]int{}),
 			args[int]{1},
 			ll[int]([]int{1}),
-			node[int](1, nil),
+			&Node[int]{1, nil},
 		},
 		{
 			"populated linkedList",
@@ -497,7 +487,7 @@ func TestLinkedList_Insert(t *testing.T) {
 			ll[int]([]int{}),
 			args[int]{10, 0},
 			ll[int]([]int{10}),
-			node[int](10, nil),
+			&Node[int]{10, nil},
 			nil,
 		},
 		{
