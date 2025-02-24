@@ -57,6 +57,43 @@ func slicesEqualUnordered(a, b []int) bool {
 	return true
 }
 
+// mapsEqual only needed for tests that resize the map because the order and structure of the linked lists will be different.
+func mapsEqual(a, b HashMap[int, int]) bool {
+	if a.Size != b.Size {
+		return false
+	}
+	aKeys := make([]int, 1)
+	aVales := make([]int, 1)
+	for _, v := range a.Pairs {
+		if v != nil && !v.IsEmpty() {
+			node := v.Head
+			if node != nil {
+				aKeys = append(aKeys, node.Key)
+				aVales = append(aVales, node.Value)
+				node = node.Next
+			}
+		}
+	}
+
+	bKeys := make([]int, 1)
+	bVales := make([]int, 1)
+	for _, v := range a.Pairs {
+		if v != nil && !v.IsEmpty() {
+			node := v.Head
+			if node != nil {
+				bKeys = append(bKeys, node.Key)
+				bVales = append(bVales, node.Value)
+				node = node.Next
+			}
+		}
+	}
+
+	if !slicesEqualUnordered(aKeys, bKeys) || !slicesEqualUnordered(aVales, bVales) {
+		return false
+	}
+	return true
+}
+
 func TestHashMap_Clear(t *testing.T) {
 	type testCase[K any, V any] struct {
 		name   string
@@ -543,7 +580,7 @@ func TestHashMap_Insert(t *testing.T) {
 			2,
 		},
 		{
-			"resize map",
+			"upsize map",
 			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2, 3}, []int{1, 2, 3}),
 			}, 3},
@@ -559,7 +596,7 @@ func TestHashMap_Insert(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
 			tt.hm.Insert(tt.args.key, tt.args.val)
-			if !reflect.DeepEqual(tt.hm, tt.wantHM) {
+			if !mapsEqual(tt.hm, tt.wantHM) {
 				t.Errorf("Insert(), hm %v, wantHM %v", tt.hm, tt.wantHM)
 			}
 			if len(tt.hm.Pairs) != tt.wantPairsSize {
@@ -581,14 +618,46 @@ func TestHashMap_Remove(t *testing.T) {
 		wantVal   V
 		wantFound bool
 	}
-	tests := []testCase[ /*TODO: finish this test*/ ]{
-		// TODO: Add test cases.
+	tests := []testCase[int, int]{
+		{
+			"empty map",
+			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			args{1},
+			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			1,
+			false,
+		},
+		{
+			"into map",
+			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1}, []int{2}),
+			}, 1},
+			args{1},
+			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			2,
+			true,
+		},
+		{
+			"downsize map",
+			// Create an initial HashMap with a Paris array of size 16:
+			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1, 2}, []int{1, 2}),
+				ll[int, int]([]int{3, 4, 5}, []int{3, 4, 5}),
+				nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+			}, 5},
+			args{5},
+			// Create a want to have HashMap with a Pairs array of size 8, because we are sizing down if len(Pairs) / 4 == HashMap.Size to len(Pairs) * 2
+			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1, 2}, []int{1, 2}),
+				ll[int, int]([]int{3, 4}, []int{3, 4}),
+				nil, nil, nil, nil,
+			}, 5},
+			5, // we double the array size if it is full, so we need to get a len of 6 here.
+			true,
+		},
 	}
 	for _, tt := range tests {
 		println()
-
-		// TODO: Make sure the resizing is also tested!!! (if len(Pairs) >> 2 == HashMap.Size, we want to resize the map to have Pairs be double the size of HashMap.Size
-		//		 This is just my approach to do it. no general rule. Resizing happens effectively at a load factor of 0.25 to be 0.5 afterwards.)
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
 			gotVal, gotFound := tt.hm.Remove(tt.args.key)
@@ -597,6 +666,9 @@ func TestHashMap_Remove(t *testing.T) {
 			}
 			if gotFound != tt.wantFound {
 				t.Errorf("Remove() gotFound = %v, want %v", gotFound, tt.wantFound)
+			}
+			if !mapsEqual(tt.hm, tt.wantHM) {
+				t.Errorf("Remove(), hm %v, wantHM %v", tt.hm, tt.wantHM)
 			}
 		})
 	}
