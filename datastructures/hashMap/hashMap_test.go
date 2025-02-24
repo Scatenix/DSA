@@ -7,6 +7,12 @@ import (
 	"testing"
 )
 
+/*
+Note for all of these tests:
+The linked list structures are not important at all for the HashMap.
+We only want to know if all the key-value pairs are present, but do not care and because of the hashing cannot even know where exactly they are.
+*/
+
 // Hint for this function: linked lists must be constructed backwards, because the push function is always inserting at head.
 // This is done to avoid needing a tail without losing performance.
 // Ordering is completely irrelevant for a hashmap.
@@ -36,6 +42,10 @@ func ll[K any, V any](keys []K, vals []V) *linkedList.LinkedList[K, V] {
 	return ll
 }
 
+func intP(i int) *int {
+	return &i
+}
+
 func slicesEqualUnordered(a, b []int) bool {
 	if len(a) != len(b) {
 		return false
@@ -51,19 +61,21 @@ func slicesEqualUnordered(a, b []int) bool {
 			return false
 		}
 	}
-	if len(countMap) != 0 {
-		return false
+	for _, v := range countMap {
+		if v != 0 {
+			return false
+		}
 	}
 	return true
 }
 
 // mapsEqual only needed for tests that resize the map because the order and structure of the linked lists will be different.
-func mapsEqual(a, b HashMap[int, int]) bool {
+func mapsEqual(a, b *HashMap[int, int]) bool {
 	if a.Size != b.Size {
 		return false
 	}
-	aKeys := make([]int, 1)
-	aVales := make([]int, 1)
+	aKeys := make([]int, 0)
+	aVales := make([]int, 0)
 	for _, v := range a.Pairs {
 		if v != nil && !v.IsEmpty() {
 			node := v.Head
@@ -75,8 +87,8 @@ func mapsEqual(a, b HashMap[int, int]) bool {
 		}
 	}
 
-	bKeys := make([]int, 1)
-	bVales := make([]int, 1)
+	bKeys := make([]int, 0)
+	bVales := make([]int, 0)
 	for _, v := range a.Pairs {
 		if v != nil && !v.IsEmpty() {
 			node := v.Head
@@ -97,22 +109,22 @@ func mapsEqual(a, b HashMap[int, int]) bool {
 func TestHashMap_Clear(t *testing.T) {
 	type testCase[K any, V any] struct {
 		name   string
-		hm     HashMap[K, V]
-		wantHM HashMap[K, V]
+		hm     *HashMap[K, V]
+		wantHM *HashMap[K, V]
 	}
 	tests := []testCase[int, int]{
 		{
 			"empty map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 		},
 		{
 			"filled map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{1}),
 				ll[int, int]([]int{2, 3}, []int{2, 3}),
 			}, 3},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 		},
 	}
 	for _, tt := range tests {
@@ -133,27 +145,27 @@ func TestHashMap_ContainsKey(t *testing.T) {
 	}
 	type testCase[K any, V any] struct {
 		name      string
-		hm        HashMap[K, V]
+		hm        *HashMap[K, V]
 		args      args
-		wantHM    HashMap[K, V]
+		wantHM    *HashMap[K, V]
 		wantFound bool
 	}
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			args{1},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			false,
 		},
 		{
 			"not found",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args{4},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -161,12 +173,12 @@ func TestHashMap_ContainsKey(t *testing.T) {
 		},
 		{
 			"found",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args{1},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -193,27 +205,27 @@ func TestHashMap_ContainsVal(t *testing.T) {
 	}
 	type testCase[K any, V any] struct {
 		name      string
-		hm        HashMap[K, V]
+		hm        *HashMap[K, V]
 		args      args
-		wantHM    HashMap[K, V]
+		wantHM    *HashMap[K, V]
 		wantFound bool
 	}
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			args{1},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			false,
 		},
 		{
 			"not found",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args{2},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -221,12 +233,12 @@ func TestHashMap_ContainsVal(t *testing.T) {
 		},
 		{
 			"found",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args{6},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -252,61 +264,57 @@ func TestHashMap_Get(t *testing.T) {
 		key int
 	}
 	type testCase[K any, V any] struct {
-		name      string
-		hm        HashMap[K, V]
-		args      args
-		wantHM    HashMap[K, V]
-		wantVal   V
-		wantFound bool
+		name    string
+		hm      *HashMap[K, V]
+		args    args
+		wantHM  *HashMap[K, V]
+		wantVal *V
 	}
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			args{1},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			0,
-			false,
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			nil,
 		},
 		{
 			"not found",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args{4},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			0,
-			false,
+			nil,
 		},
 		{
 			"found",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
-				ll[int, int]([]int{1}, []int{4}),
-				ll[int, int]([]int{2, 3}, []int{5, 6}),
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1, 3}, []int{4, 6}), // hash algorithm will place k,v at index 0.
+				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
 			args{3},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
-				ll[int, int]([]int{1}, []int{4}),
-				ll[int, int]([]int{2, 3}, []int{5, 6}),
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1, 3}, []int{4, 6}),
+				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
-			6,
-			true,
+			intP(6),
 		},
 	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			gotVal, gotFound := tt.hm.Get(tt.args.key)
+			gotVal, err := tt.hm.Get(tt.args.key)
+			if err != nil {
+				t.Errorf("Hash function threw error: %v", err)
+			}
 			if !reflect.DeepEqual(gotVal, tt.wantVal) {
 				t.Errorf("Get() gotVal = %v, want %v", gotVal, tt.wantVal)
-			}
-			if gotFound != tt.wantFound {
-				t.Errorf("Get() gotFound = %v, want %v", gotFound, tt.wantFound)
 			}
 			if !reflect.DeepEqual(tt.hm, tt.wantHM) {
 				t.Errorf("Get(), hm %v, wantHM %v", tt.hm, tt.wantHM)
@@ -320,61 +328,54 @@ func TestHashMap_GetKey(t *testing.T) {
 		value int
 	}
 	type testCase[K any, V any] struct {
-		name      string
-		hm        HashMap[K, V]
-		args      args
-		wantHM    HashMap[K, V]
-		wantKey   K
-		wantFound bool
+		name    string
+		hm      *HashMap[K, V]
+		args    args
+		wantHM  *HashMap[K, V]
+		wantKey *K
 	}
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			args{1},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			0,
-			false,
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			nil,
 		},
 		{
 			"not found",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args{2},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			0,
-			false,
+			nil,
 		},
 		{
 			"found",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
-				ll[int, int]([]int{1}, []int{4}),
-				ll[int, int]([]int{2, 3}, []int{5, 6}),
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1, 3}, []int{4, 6}), // hash algorithm will place k,v at index 0.
+				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
 			args{6},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
-				ll[int, int]([]int{1}, []int{4}),
-				ll[int, int]([]int{2, 3}, []int{5, 6}),
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1, 3}, []int{4, 6}),
+				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
-			6,
-			true,
+			intP(3),
 		},
 	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			gotKey, gotFound := tt.hm.GetKey(tt.args.value)
+			gotKey := tt.hm.GetKey(tt.args.value)
 			if !reflect.DeepEqual(gotKey, tt.wantKey) {
 				t.Errorf("GetKey() gotKey = %v, want %v", gotKey, tt.wantKey)
-			}
-			if gotFound != tt.wantFound {
-				t.Errorf("GetKey() gotFound = %v, want %v", gotFound, tt.wantFound)
 			}
 			if !reflect.DeepEqual(tt.hm, tt.wantHM) {
 				t.Errorf("GetKey(), hm %v, wantHM %v", tt.hm, tt.wantHM)
@@ -386,24 +387,24 @@ func TestHashMap_GetKey(t *testing.T) {
 func TestHashMap_IsEmpty(t *testing.T) {
 	type testCase[K any, V any] struct {
 		name     string
-		hm       HashMap[K, V]
-		wantHM   HashMap[K, V]
+		hm       *HashMap[K, V]
+		wantHM   *HashMap[K, V]
 		wantBool bool
 	}
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			true,
 		},
 		{
 			"filled map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -426,24 +427,24 @@ func TestHashMap_IsEmpty(t *testing.T) {
 func TestHashMap_Keys(t *testing.T) {
 	type testCase[K any, V any] struct {
 		name     string
-		hm       HashMap[K, V]
-		wantHM   HashMap[K, V]
+		hm       *HashMap[K, V]
+		wantHM   *HashMap[K, V]
 		wantKeys []K
 	}
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			make([]int, 0),
 		},
 		{
 			"filled map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -467,24 +468,24 @@ func TestHashMap_Keys(t *testing.T) {
 func TestHashMap_Values(t *testing.T) {
 	type testCase[K any, V any] struct {
 		name       string
-		hm         HashMap[K, V]
-		wantHM     HashMap[K, V]
+		hm         *HashMap[K, V]
+		wantHM     *HashMap[K, V]
 		wantValues []V
 	}
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			make([]int, 0),
 		},
 		{
 			"filled map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -512,27 +513,24 @@ func TestNewHashMap(t *testing.T) {
 	tests := []struct {
 		name   string
 		args   args
-		wantHM HashMap[int, int]
+		wantHM *HashMap[int, int]
 	}{
 		{
 			"size 0",
 			args{0},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 		},
 		{
 			"size 1",
 			args{1},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
-				ll[int, int]([]int{1}, []int{2}),
-			}, 1},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{nil}, 0},
 		},
 		{
 			"size 10",
 			args{10},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
-				ll[int, int]([]int{1, 2, 3, 4, 5}, []int{1, 2, 3, 4, 5}),
-				ll[int, int]([]int{6, 7, 8, 9, 10}, []int{6, 7, 8, 9, 10}),
-			}, 10},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+			}, 0},
 		},
 	}
 	for _, tt := range tests {
@@ -553,39 +551,42 @@ func TestHashMap_Insert(t *testing.T) {
 	}
 	type testCase[K any, V any] struct {
 		name          string
-		hm            HashMap[K, V]
+		hm            *HashMap[K, V]
 		args          args
-		wantHM        HashMap[K, V]
+		wantHM        *HashMap[K, V]
 		wantPairsSize int
 	}
 	tests := []testCase[int, int]{
 		{
 			"into empty map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			args{1, 2},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
 			1,
 		},
 		{
 			"into map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
 			args{3, 4},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 3}, []int{2, 4}),
 			}, 2},
 			2,
 		},
 		{
 			"upsize map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
-				ll[int, int]([]int{1, 2, 3}, []int{1, 2, 3}),
+			// it is important for the test, that the Pairs length starts with 3
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1}, []int{1}),
+				ll[int, int]([]int{2, 3}, []int{2, 3}),
+				nil,
 			}, 3},
 			args{4, 4},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2, 3, 4}, []int{1, 2, 3, 4}),
 			}, 4},
 			6, // we double the array size if it is full, so we need to get a len of 6 here.
@@ -611,61 +612,80 @@ func TestHashMap_Remove(t *testing.T) {
 		key int
 	}
 	type testCase[K any, V any] struct {
-		name      string
-		hm        HashMap[K, V]
-		args      args
-		wantHM    HashMap[K, V]
-		wantVal   V
-		wantFound bool
+		name    string
+		hm      *HashMap[K, V]
+		args    args
+		wantHM  *HashMap[K, V]
+		wantVal V
 	}
 	tests := []testCase[int, int]{
 		{
 			"empty map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			args{1},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			1,
-			false,
 		},
 		{
-			"into map",
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			"remove from map size 1",
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
 			args{1},
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			2,
-			true,
+		},
+		{
+			"remove from map size 4",
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1, 2}, []int{1, 2}),
+				ll[int, int]([]int{3}, []int{3}),
+				ll[int, int]([]int{4}, []int{4}),
+			}, 4},
+			args{1},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{2}, []int{2}),
+				ll[int, int]([]int{3}, []int{3}),
+				ll[int, int]([]int{4}, []int{4}),
+			}, 3},
+			2,
+		},
+		{
+			"try remove not existing key",
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1}, []int{2}),
+			}, 1},
+			args{2},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1}, []int{2}),
+			}, 1},
+			2,
 		},
 		{
 			"downsize map",
 			// Create an initial HashMap with a Paris array of size 16:
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2}, []int{1, 2}),
 				ll[int, int]([]int{3, 4, 5}, []int{3, 4, 5}),
 				nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 			}, 5},
 			args{5},
 			// Create a want to have HashMap with a Pairs array of size 8, because we are sizing down if len(Pairs) / 4 == HashMap.Size to len(Pairs) * 2
-			HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2}, []int{1, 2}),
 				ll[int, int]([]int{3, 4}, []int{3, 4}),
 				nil, nil, nil, nil,
 			}, 5},
 			5, // we double the array size if it is full, so we need to get a len of 6 here.
-			true,
 		},
 	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			gotVal, gotFound := tt.hm.Remove(tt.args.key)
+			gotVal := tt.hm.Remove(tt.args.key)
 			if !reflect.DeepEqual(gotVal, tt.wantVal) {
 				t.Errorf("Remove() gotVal = %v, want %v", gotVal, tt.wantVal)
-			}
-			if gotFound != tt.wantFound {
-				t.Errorf("Remove() gotFound = %v, want %v", gotFound, tt.wantFound)
 			}
 			if !mapsEqual(tt.hm, tt.wantHM) {
 				t.Errorf("Remove(), hm %v, wantHM %v", tt.hm, tt.wantHM)

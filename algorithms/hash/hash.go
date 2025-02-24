@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"fmt"
 )
 
 /* NOTE:
@@ -34,7 +33,6 @@ func DJB2(input any) (uint32, error) {
 		hash = ((hash << 5) + hash) + uint32(in[i])
 	}
 
-	fmt.Println(hash)
 	return hash, nil
 }
 
@@ -51,7 +49,6 @@ func XxHash(input any) (uint64, error) {
 		hash = hash*prime + uint64(in[i])
 	}
 
-	fmt.Println(hash)
 	return hash, nil
 }
 
@@ -108,7 +105,6 @@ func Murmur3(input any, seed uint32) (uint32, error) {
 	hash *= 0xc2b2ae35
 	hash ^= hash >> 16
 
-	fmt.Println(hash)
 	return hash, nil
 }
 
