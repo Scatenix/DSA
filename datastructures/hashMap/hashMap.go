@@ -7,12 +7,12 @@ import (
 )
 
 /*
-Dynamic resizing:
-	Resizing is typically done by doubling the size of the underlying array and recalculating every key.
-	TODO: Think about adding a retrival of all nodes per linked list as function within the linked list itself or do it in this hashMap with node traversal.
+Tested:
+With my Murmur3 implementation I get a distribution of about 60% for integers 0-999999. about 40% of buckets are empty.
+The longest linked list has a size of 11
 */
 
-var seed uint32 = 7757 // Prime number as seed. For a production HashMap, this seed should change randomly to avoid hashMap ddos attacks.
+var seed uint32 = 7757 // Prime number as seed. For a production HashMap, this seed should change randomly to avoid hashMap DoS attacks.
 
 type HashMap[K, V any] struct {
 	Pairs []*linkedList.LinkedList[K, V]
