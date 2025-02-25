@@ -52,6 +52,7 @@ func XxHash(input any) (uint64, error) {
 	return hash, nil
 }
 
+// Murmur3 should correctly calculate a hash for almost all types. One exception is type chan (any) which is not supported.
 func Murmur3(input any, seed uint32) (uint32, error) {
 	in, err := convertToByteArray(input)
 	if err != nil {

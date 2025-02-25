@@ -1,5 +1,9 @@
 package linkedList
 
+/*
+For the future: It would probably be better if Value is a pointer and all the returns of Value as well.
+*/
+
 import "errors"
 
 var ErrIndexOutOfRange = errors.New("index out of range")

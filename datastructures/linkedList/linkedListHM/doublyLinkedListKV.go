@@ -2,6 +2,8 @@ package linkedList
 
 /*
 This is an adjusted doubly linked list wit key and value field for hash maps by altering it to fit better in a hash map.
+
+For the future: It would probably be better if Key and Value are pointers and all the returns of Key or Value as well.
 */
 
 import (

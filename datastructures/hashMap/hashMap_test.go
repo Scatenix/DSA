@@ -116,7 +116,7 @@ func TestHashMap_Clear(t *testing.T) {
 		{
 			"empty map",
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{nil}, 0}, // Putting nil in ll slice because I clear maps to have a length 1
 		},
 		{
 			"filled map",
@@ -124,7 +124,7 @@ func TestHashMap_Clear(t *testing.T) {
 				ll[int, int]([]int{1}, []int{1}),
 				ll[int, int]([]int{2, 3}, []int{2, 3}),
 			}, 3},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{nil}, 0}, // Putting nil in ll slice because I clear maps to have a length 1
 		},
 	}
 	for _, tt := range tests {
@@ -140,13 +140,13 @@ func TestHashMap_Clear(t *testing.T) {
 }
 
 func TestHashMap_ContainsKey(t *testing.T) {
-	type args struct {
-		key int
+	type args[K any] struct {
+		key K
 	}
 	type testCase[K any, V any] struct {
 		name      string
 		hm        *HashMap[K, V]
-		args      args
+		args      args[K]
 		wantHM    *HashMap[K, V]
 		wantFound bool
 	}
@@ -154,7 +154,7 @@ func TestHashMap_ContainsKey(t *testing.T) {
 		{
 			"emtpy map",
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			args{1},
+			args[int]{1},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			false,
 		},
@@ -164,7 +164,7 @@ func TestHashMap_ContainsKey(t *testing.T) {
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			args{4},
+			args[int]{4},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
@@ -177,7 +177,7 @@ func TestHashMap_ContainsKey(t *testing.T) {
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			args{1},
+			args[int]{1},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
@@ -185,15 +185,37 @@ func TestHashMap_ContainsKey(t *testing.T) {
 			true,
 		},
 	}
+	testError := []testCase[chan int, chan int]{
+		{
+			// My hashing function does not support values of type channel
+			"test error",
+			&HashMap[chan int, chan int]{[]*linkedList.LinkedList[chan int, chan int]{
+				ll[chan int, chan int]([]chan int{}, []chan int{}),
+			}, 1},
+			args[chan int]{nil},
+			nil, // We do not care for it in this test.
+			false,
+		},
+	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			if gotFound := tt.hm.ContainsKey(tt.args.key); gotFound != tt.wantFound {
+			if gotFound, _ := tt.hm.ContainsKey(tt.args.key); gotFound != tt.wantFound {
 				t.Errorf("ContainsKey() = %v, wantFound %v", gotFound, tt.wantFound)
 			}
 			if !reflect.DeepEqual(tt.hm, tt.wantHM) {
 				t.Errorf("ContainsKey(), hm %v, wantHM %v", tt.hm, tt.wantHM)
+			}
+		})
+	}
+	for _, tt := range testError {
+		println()
+		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(t, tt.name)
+			_, err := tt.hm.ContainsKey(tt.args.key)
+			if err == nil {
+				t.Errorf("test %v should have thrown error. Got %v", tt.name, err)
 			}
 		})
 	}
@@ -260,13 +282,13 @@ func TestHashMap_ContainsVal(t *testing.T) {
 }
 
 func TestHashMap_Get(t *testing.T) {
-	type args struct {
-		key int
+	type args[T any] struct {
+		key T
 	}
 	type testCase[K any, V any] struct {
 		name    string
 		hm      *HashMap[K, V]
-		args    args
+		args    args[K]
 		wantHM  *HashMap[K, V]
 		wantVal *V
 	}
@@ -274,7 +296,7 @@ func TestHashMap_Get(t *testing.T) {
 		{
 			"emtpy map",
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			args{1},
+			args[int]{1},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
 			nil,
 		},
@@ -284,7 +306,7 @@ func TestHashMap_Get(t *testing.T) {
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			args{4},
+			args[int]{4},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
@@ -297,12 +319,24 @@ func TestHashMap_Get(t *testing.T) {
 				ll[int, int]([]int{1, 3}, []int{4, 6}), // hash algorithm will place k,v at index 0.
 				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
-			args{3},
+			args[int]{3},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 3}, []int{4, 6}),
 				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
 			intP(6),
+		},
+	}
+	testError := []testCase[chan int, chan int]{
+		{
+			// My hashing function does not support values of type channel
+			"test error",
+			&HashMap[chan int, chan int]{[]*linkedList.LinkedList[chan int, chan int]{
+				ll[chan int, chan int]([]chan int{}, []chan int{}),
+			}, 1},
+			args[chan int]{nil},
+			nil, // We do not care for it in this test.
+			nil,
 		},
 	}
 	for _, tt := range tests {
@@ -318,6 +352,16 @@ func TestHashMap_Get(t *testing.T) {
 			}
 			if !reflect.DeepEqual(tt.hm, tt.wantHM) {
 				t.Errorf("Get(), hm %v, wantHM %v", tt.hm, tt.wantHM)
+			}
+		})
+	}
+	for _, tt := range testError {
+		println()
+		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(t, tt.name)
+			_, err := tt.hm.Get(tt.args.key)
+			if err == nil {
+				t.Errorf("test %v should have thrown error. Got %v", tt.name, err)
 			}
 		})
 	}
@@ -545,14 +589,14 @@ func TestNewHashMap(t *testing.T) {
 }
 
 func TestHashMap_Insert(t *testing.T) {
-	type args struct {
-		key int
-		val int
+	type args[K, V any] struct {
+		key K
+		val V
 	}
 	type testCase[K any, V any] struct {
 		name          string
 		hm            *HashMap[K, V]
-		args          args
+		args          args[K, V]
 		wantHM        *HashMap[K, V]
 		wantPairsSize int
 	}
@@ -560,7 +604,7 @@ func TestHashMap_Insert(t *testing.T) {
 		{
 			"into empty map",
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			args{1, 2},
+			args[int, int]{1, 2},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
@@ -571,7 +615,7 @@ func TestHashMap_Insert(t *testing.T) {
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
-			args{3, 4},
+			args[int, int]{3, 4},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 3}, []int{2, 4}),
 			}, 2},
@@ -585,11 +629,23 @@ func TestHashMap_Insert(t *testing.T) {
 				ll[int, int]([]int{2, 3}, []int{2, 3}),
 				nil,
 			}, 3},
-			args{4, 4},
+			args[int, int]{4, 4},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2, 3, 4}, []int{1, 2, 3, 4}),
 			}, 4},
 			6, // we double the array size if it is full, so we need to get a len of 6 here.
+		},
+	}
+	testError := []testCase[chan int, chan int]{
+		{
+			// My hashing function does not support values of type channel
+			"test error",
+			&HashMap[chan int, chan int]{[]*linkedList.LinkedList[chan int, chan int]{
+				ll[chan int, chan int]([]chan int{}, []chan int{}),
+			}, 0},
+			args[chan int, chan int]{nil, nil},
+			nil, // We do not care for it in this test.
+			0,   // We do not care for it in this test.
 		},
 	}
 	for _, tt := range tests {
@@ -605,90 +661,139 @@ func TestHashMap_Insert(t *testing.T) {
 			}
 		})
 	}
+	for _, tt := range testError {
+		println()
+		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(t, tt.name)
+			err := tt.hm.Insert(tt.args.key, tt.args.val)
+			if err == nil {
+				t.Errorf("test %v should have thrown error. Got %v", tt.name, err)
+			}
+		})
+	}
 }
 
 func TestHashMap_Remove(t *testing.T) {
-	type args struct {
-		key int
+	type args[K any] struct {
+		key K
 	}
 	type testCase[K any, V any] struct {
 		name    string
 		hm      *HashMap[K, V]
-		args    args
+		args    args[K]
 		wantHM  *HashMap[K, V]
-		wantVal V
+		wantVal *V
 	}
 	tests := []testCase[int, int]{
 		{
 			"empty map",
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			args{1},
+			args[int]{1},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			1,
+			nil,
 		},
 		{
 			"remove from map size 1",
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
-			args{1},
+			args[int]{1},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			2,
+			intP(2),
 		},
 		{
-			"remove from map size 4",
+			"remove from map size 4 with ll.Size = 1",
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2}, []int{1, 2}),
+				ll[int, int]([]int{4}, []int{4}),
+				ll[int, int]([]int{3}, []int{3}), // need to place value here because hashing will place key 3 at index 2
+			}, 4},
+			args[int]{3},
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{1, 2}, []int{1, 2}),
+				ll[int, int]([]int{4}, []int{4}),
+			}, 3},
+			intP(3),
+		},
+		{
+			"remove from map size 4 with ll.Size > 1",
+			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{3}, []int{3}),
 				ll[int, int]([]int{4}, []int{4}),
+				ll[int, int]([]int{1, 2}, []int{1, 2}), // need to place value here because hashing will place key 2 at index 2
 			}, 4},
-			args{1},
+			args[int]{2},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
-				ll[int, int]([]int{2}, []int{2}),
+				ll[int, int]([]int{1}, []int{1}),
 				ll[int, int]([]int{3}, []int{3}),
 				ll[int, int]([]int{4}, []int{4}),
 			}, 3},
-			2,
+			intP(2),
 		},
 		{
 			"try remove not existing key",
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
-			args{2},
+			args[int]{2},
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
-			2,
+			nil,
 		},
 		{
 			"downsize map",
-			// Create an initial HashMap with a Paris array of size 16:
+			// Create an initial HashMap with a Paris array of size 20:
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+				ll[int, int]([]int{3, 4, 5}, []int{3, 4, 5}), // need to place value here because hashing will place key 5 at index 8
 				ll[int, int]([]int{1, 2}, []int{1, 2}),
-				ll[int, int]([]int{3, 4, 5}, []int{3, 4, 5}),
-				nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+				nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, // 18 empty buckets
 			}, 5},
-			args{5},
+			args[int]{5},
 			// Create a want to have HashMap with a Pairs array of size 8, because we are sizing down if len(Pairs) / 4 == HashMap.Size to len(Pairs) * 2
 			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2}, []int{1, 2}),
 				ll[int, int]([]int{3, 4}, []int{3, 4}),
-				nil, nil, nil, nil,
-			}, 5},
-			5, // we double the array size if it is full, so we need to get a len of 6 here.
+				nil, nil, nil, nil, nil, nil,
+			}, 4},
+			intP(5), // we double the array size if it is full, so we need to get a len of 6 here.
+		},
+	}
+	testError := []testCase[chan int, chan int]{
+		{
+			// My hashing function does not support values of type channel
+			"test error",
+			&HashMap[chan int, chan int]{[]*linkedList.LinkedList[chan int, chan int]{
+				ll[chan int, chan int]([]chan int{}, []chan int{}),
+			}, 1},
+			args[chan int]{nil},
+			nil, // We do not care for it in this test.
+			nil, // We do not care for it in this test.
 		},
 	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, tt.name)
-			gotVal := tt.hm.Remove(tt.args.key)
+			gotVal, err := tt.hm.Remove(tt.args.key)
+			if err != nil {
+				t.Errorf("Hash function threw error: %v", err)
+			}
 			if !reflect.DeepEqual(gotVal, tt.wantVal) {
 				t.Errorf("Remove() gotVal = %v, want %v", gotVal, tt.wantVal)
 			}
 			if !mapsEqual(tt.hm, tt.wantHM) {
 				t.Errorf("Remove(), hm %v, wantHM %v", tt.hm, tt.wantHM)
+			}
+		})
+	}
+	for _, tt := range testError {
+		println()
+		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(t, tt.name)
+			_, err := tt.hm.Remove(tt.args.key)
+			if err == nil {
+				t.Errorf("test %v should have thrown error. Got %v", tt.name, err)
 			}
 		})
 	}
