@@ -3,20 +3,38 @@ package search
 import (
 	"dsa/util/sugar"
 	"reflect"
+	"strings"
 	"testing"
 )
+
+var intComp = func(a, b int) int {
+	if a < b {
+		return -1
+	} else if a > b {
+		return 1
+	}
+	return 0
+}
+
+var stringComp = func(a, b string) int {
+	return strings.Compare(a, b)
+}
+
+var complexComp = func(searchTerm complexType, B complexType) int {
+	return strings.Compare(searchTerm.Y, B.Y)
+}
 
 func TestBinarySearchInt(t *testing.T) {
 	type args[T any] struct {
 		A          []T
 		searchTerm T
-		comp       func(A T, B T) bool
+		comp       func(A T, B T) int
 	}
 	type testCase[T any] struct {
 		name      string
 		args      args[T]
 		wantArray []T
-		wantVal   T
+		wantIndex int
 		wantFound bool
 	}
 	tests := []testCase[int]{
@@ -25,7 +43,7 @@ func TestBinarySearchInt(t *testing.T) {
 			args[int]{
 				[]int{},
 				1,
-				nil,
+				intComp,
 			},
 			[]int{},
 			0,
@@ -36,10 +54,10 @@ func TestBinarySearchInt(t *testing.T) {
 			args[int]{
 				[]int{2},
 				2,
-				nil,
+				intComp,
 			},
 			[]int{2},
-			2,
+			0,
 			true,
 		},
 		{
@@ -47,7 +65,7 @@ func TestBinarySearchInt(t *testing.T) {
 			args[int]{
 				[]int{2},
 				1,
-				nil,
+				intComp,
 			},
 			[]int{2},
 			0,
@@ -58,10 +76,10 @@ func TestBinarySearchInt(t *testing.T) {
 			args[int]{
 				[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 				16,
-				nil,
+				intComp,
 			},
 			[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
-			16,
+			15,
 			true,
 		},
 		{
@@ -69,7 +87,7 @@ func TestBinarySearchInt(t *testing.T) {
 			args[int]{
 				[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 				21,
-				nil,
+				intComp,
 			},
 			[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 			0,
@@ -80,7 +98,7 @@ func TestBinarySearchInt(t *testing.T) {
 			args[int]{
 				[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 				0,
-				nil,
+				intComp,
 			},
 			[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 			0,
@@ -91,7 +109,7 @@ func TestBinarySearchInt(t *testing.T) {
 			args[int]{
 				[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21},
 				10,
-				nil,
+				intComp,
 			},
 			[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21},
 			0,
@@ -102,10 +120,10 @@ func TestBinarySearchInt(t *testing.T) {
 			args[int]{
 				[]int{1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 				8,
-				nil,
+				intComp,
 			},
 			[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
-			8,
+			7,
 			true,
 		},
 	}
@@ -113,9 +131,9 @@ func TestBinarySearchInt(t *testing.T) {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, t.Name())
-			gotVal, gotFound := BinarySearch(tt.args.A, tt.args.searchTerm, tt.args.comp)
-			if !reflect.DeepEqual(gotVal, tt.wantVal) {
-				t.Errorf("int BinarySearch() = %v, want %v", gotVal, tt.wantVal)
+			gotIndex, gotFound := BinarySearch(tt.args.A, tt.args.searchTerm, tt.args.comp)
+			if !reflect.DeepEqual(gotIndex, tt.wantIndex) {
+				t.Errorf("int BinarySearch() = %v, want %v", gotIndex, tt.wantIndex)
 			}
 			if !reflect.DeepEqual(gotFound, tt.wantFound) {
 				t.Errorf("int BinarySearch() = %v, want %v", gotFound, tt.wantFound)
@@ -131,46 +149,68 @@ func TestBinarySearchString(t *testing.T) {
 	type args[T any] struct {
 		A          []T
 		searchTerm T
-		comp       func(A T, B T) bool
+		comp       func(A T, B T) int
 	}
 	type testCase[T any] struct {
 		name      string
 		args      args[T]
 		wantArray []T
-		wantVal   T
+		wantIndex int
 		wantFound bool
 	}
 	tests := []testCase[string]{
 		{
-			"empty array",
+			"string in single array, found",
 			args[string]{
-				[]string{},
-				"1",
-				nil,
+				[]string{"abc"},
+				"abc",
+				stringComp,
 			},
-			[]string{},
-			"0",
+			[]string{"abc"},
+			0,
+			true,
+		},
+		{
+			"string in single array, not found",
+			args[string]{
+				[]string{"abc"},
+				"def",
+				stringComp,
+			},
+			[]string{"abc"},
+			0,
 			false,
 		},
 		{
-			"single array, odd, found",
+			"string in big array, found",
 			args[string]{
-				[]string{"2"},
-				"2",
-				nil,
+				[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "bcd", "efg", "hij", "klm", "nop"},
+				"bcd",
+				stringComp,
 			},
-			[]string{"2"},
-			"2",
+			[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "bcd", "efg", "hij", "klm", "nop"},
+			9,
 			true,
+		},
+		{
+			"string in big array, not found",
+			args[string]{
+				[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "bcd", "efg", "hij", "klm", "nop"},
+				"lmn",
+				stringComp,
+			},
+			[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "bcd", "efg", "hij", "klm", "nop"},
+			0,
+			false,
 		},
 	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, t.Name())
-			gotVal, gotFound := BinarySearch(tt.args.A, tt.args.searchTerm, tt.args.comp)
-			if !reflect.DeepEqual(gotVal, tt.wantVal) {
-				t.Errorf("string BinarySearch() = %v, want %v", gotVal, tt.wantVal)
+			gotIndex, gotFound := BinarySearch(tt.args.A, tt.args.searchTerm, tt.args.comp)
+			if !reflect.DeepEqual(gotIndex, tt.wantIndex) {
+				t.Errorf("string BinarySearch() = %v, want %v", gotIndex, tt.wantIndex)
 			}
 			if !reflect.DeepEqual(gotFound, tt.wantFound) {
 				t.Errorf("string BinarySearch() = %v, want %v", gotFound, tt.wantFound)
@@ -191,46 +231,93 @@ func TestBinarySearchComplex(t *testing.T) {
 	type args[T any] struct {
 		A          []T
 		searchTerm T
-		comp       func(A T, B T) bool
+		comp       func(A T, B T) int
 	}
 	type testCase[T any] struct {
 		name      string
 		args      args[T]
 		wantArray []T
-		wantVal   T
+		wantIndex int
 		wantFound bool
 	}
 	tests := []testCase[complexType]{
 		{
-			"empty array",
+			"complexType in single array, found",
 			args[complexType]{
-				[]complexType{},
-				complexType{0, ""},
-				nil,
+				[]complexType{{1, "abc"}},
+				complexType{1, "abc"},
+				complexComp,
 			},
-			[]complexType{},
-			complexType{0, "a"},
+			[]complexType{{1, "abc"}},
+			0,
+			true,
+		},
+		{
+			"complexType in single array, not found",
+			args[complexType]{
+				[]complexType{{1, "abc"}},
+				complexType{1, "aaa"},
+				complexComp,
+			},
+			[]complexType{{1, "abc"}},
+			0,
 			false,
 		},
 		{
-			"single array, odd, found",
+			"complexType in big array, found",
 			args[complexType]{
-				[]complexType{complexType{0, ""}},
-				complexType{0, ""},
-				nil,
+				[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
+					{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
+					{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+				complexType{3, "ghi"},
+				complexComp,
 			},
-			[]complexType{complexType{0, ""}},
-			complexType{0, ""},
+			[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
+				{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
+				{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+			9,
 			true,
+		},
+		{
+			"complexType in big array, not found",
+			args[complexType]{
+				[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
+					{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
+					{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+				complexType{8, "lmn"},
+				complexComp,
+			},
+			[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
+				{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
+				{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+			0,
+			false,
+		},
+		{
+			"complexType in big array, bad comparator function",
+			args[complexType]{
+				[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
+					{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
+					{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+				complexType{8, "lmn"},
+				func(searchTerm complexType, B complexType) int {
+					return strings.Compare(searchTerm.Y, B.Y) * -1
+				},
+			},
+			[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
+				{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
+				{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+			0,
+			false,
 		},
 	}
 	for _, tt := range tests {
 		println()
 		t.Run(tt.name, func(t *testing.T) {
 			defer sugar.Lite(t, t.Name())
-			gotVal, gotFound := BinarySearch(tt.args.A, tt.args.searchTerm, tt.args.comp)
-			if !reflect.DeepEqual(gotVal, tt.wantVal) {
-				t.Errorf("complexType BinarySearch() = %v, want %v", gotVal, tt.wantVal)
+			gotIndex, gotFound := BinarySearch(tt.args.A, tt.args.searchTerm, tt.args.comp)
+			if !reflect.DeepEqual(gotIndex, tt.wantIndex) {
+				t.Errorf("complexType BinarySearch() = %v, want %v", gotIndex, tt.wantIndex)
 			}
 			if !reflect.DeepEqual(gotFound, tt.wantFound) {
 				t.Errorf("complexType BinarySearch() = %v, want %v", gotFound, tt.wantFound)
