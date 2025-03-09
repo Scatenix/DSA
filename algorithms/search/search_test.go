@@ -8,12 +8,7 @@ import (
 )
 
 var intComp = func(a, b int) int {
-	if a < b {
-		return -1
-	} else if a > b {
-		return 1
-	}
-	return 0
+	return a - b
 }
 
 var stringComp = func(a, b string) int {
@@ -22,6 +17,47 @@ var stringComp = func(a, b string) int {
 
 var complexComp = func(searchTerm complexType, B complexType) int {
 	return strings.Compare(searchTerm.Y, B.Y)
+}
+
+func TestBinarySearchPanic(t *testing.T) {
+	type args[T any] struct {
+		A          []T
+		searchTerm T
+		comp       func(A T, B T) int
+	}
+	type testCase[T any] struct {
+		name      string
+		args      args[T]
+		wantArray []T
+		wantIndex int
+		wantFound bool
+	}
+	tests := []testCase[int]{
+		{
+			"no comparator, panic",
+			args[int]{
+				[]int{1},
+				1,
+				nil,
+			},
+			[]int{1},
+			0,
+			false,
+		},
+	}
+	for _, tt := range tests {
+		println()
+		t.Run(tt.name, func(t *testing.T) {
+			defer sugar.Lite(t, t.Name())
+			defer func() {
+				if r := recover(); r == nil {
+					t.Errorf("BinarySearch(): Expected to panic, but it did not.")
+				}
+			}()
+
+			BinarySearch(tt.args.A, tt.args.searchTerm, tt.args.comp)
+		})
+	}
 }
 
 func TestBinarySearchInt(t *testing.T) {
@@ -111,7 +147,7 @@ func TestBinarySearchInt(t *testing.T) {
 				10,
 				intComp,
 			},
-			[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21},
+			[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21},
 			0,
 			false,
 		},
@@ -122,7 +158,7 @@ func TestBinarySearchInt(t *testing.T) {
 				8,
 				intComp,
 			},
-			[]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+			[]int{1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
 			7,
 			true,
 		},
@@ -184,22 +220,22 @@ func TestBinarySearchString(t *testing.T) {
 		{
 			"string in big array, found",
 			args[string]{
-				[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "bcd", "efg", "hij", "klm", "nop"},
-				"bcd",
+				[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "zaa", "zbb", "zcc", "zdd", "zee"},
+				"zaa",
 				stringComp,
 			},
-			[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "bcd", "efg", "hij", "klm", "nop"},
+			[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "zaa", "zbb", "zcc", "zdd", "zee"},
 			9,
 			true,
 		},
 		{
 			"string in big array, not found",
 			args[string]{
-				[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "bcd", "efg", "hij", "klm", "nop"},
+				[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "zaa", "zbb", "zcc", "zdd", "zee"},
 				"lmn",
 				stringComp,
 			},
-			[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "bcd", "efg", "hij", "klm", "nop"},
+			[]string{"abc", "def", "ghi", "jkl", "mno", "pqr", "stu", "vwx", "yza", "zaa", "zbb", "zcc", "zdd", "zee"},
 			0,
 			false,
 		},
@@ -267,29 +303,29 @@ func TestBinarySearchComplex(t *testing.T) {
 			"complexType in big array, found",
 			args[complexType]{
 				[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
-					{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
-					{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+					{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "zaa"},
+					{11, "zbb"}, {12, "zcc"}, {13, "zdd"}, {14, "zee"}},
 				complexType{3, "ghi"},
 				complexComp,
 			},
 			[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
-				{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
-				{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
-			9,
+				{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "zaa"},
+				{11, "zbb"}, {12, "zcc"}, {13, "zdd"}, {14, "zee"}},
+			2,
 			true,
 		},
 		{
 			"complexType in big array, not found",
 			args[complexType]{
 				[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
-					{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
-					{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+					{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "zaa"},
+					{11, "zbb"}, {12, "zcc"}, {13, "zdd"}, {14, "zee"}},
 				complexType{8, "lmn"},
 				complexComp,
 			},
 			[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
-				{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
-				{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+				{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "zaa"},
+				{11, "zbb"}, {12, "zcc"}, {13, "zdd"}, {14, "zee"}},
 			0,
 			false,
 		},
@@ -297,16 +333,16 @@ func TestBinarySearchComplex(t *testing.T) {
 			"complexType in big array, bad comparator function",
 			args[complexType]{
 				[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
-					{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
-					{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+					{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "zaa"},
+					{11, "zbb"}, {12, "zcc"}, {13, "zdd"}, {14, "zee"}},
 				complexType{8, "lmn"},
 				func(searchTerm complexType, B complexType) int {
 					return strings.Compare(searchTerm.Y, B.Y) * -1
 				},
 			},
 			[]complexType{{1, "abc"}, {2, "def"}, {3, "ghi"}, {4, "jkl"}, {5, "mno"},
-				{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "bcd"},
-				{11, "efg"}, {12, "hij"}, {13, "klm"}, {14, "nop"}},
+				{6, "pqr"}, {7, "stu"}, {8, "vwx"}, {9, "yza"}, {10, "zaa"},
+				{11, "zbb"}, {12, "zcc"}, {13, "zdd"}, {14, "zee"}},
 			0,
 			false,
 		},
