@@ -2,7 +2,7 @@ package hashMap
 
 import (
 	"dsa/algorithms/hash"
-	linkedList "dsa/datastructures/linkedList/linkedListHM"
+	"dsa/datastructures/doublyLinkedList/doublyLinkedListHM"
 	"reflect"
 )
 
@@ -15,7 +15,7 @@ The longest linked list has a size of 11
 var seed uint32 = 7757 // Prime number as seed. For a production HashMap, this seed should change randomly to avoid hashMap DoS attacks.
 
 type HashMap[K, V any] struct {
-	Pairs []*linkedList.LinkedList[K, V]
+	Pairs []*doublyLinkedListHM.LinkedList[K, V]
 	Size  uint
 }
 
@@ -24,7 +24,7 @@ type HashMap[K, V any] struct {
 // initialCapacity - The initial capacity of the HashMap on its creation.
 func NewHashMap[K, V any](initialCapacity uint) *HashMap[K, V] {
 	return &HashMap[K, V]{
-		make([]*linkedList.LinkedList[K, V], initialCapacity),
+		make([]*doublyLinkedListHM.LinkedList[K, V], initialCapacity),
 		0,
 	}
 }
@@ -98,7 +98,7 @@ func (hm *HashMap[K, V]) Insert(key K, val V) error {
 	index := int(h) % len(hm.Pairs)
 
 	if hm.Pairs[index] == nil {
-		hm.Pairs[index] = linkedList.NewLinkedList[K, V](key, val)
+		hm.Pairs[index] = doublyLinkedListHM.NewLinkedList[K, V](key, val)
 	} else {
 		hm.Pairs[index].Push(key, val)
 	}
@@ -226,7 +226,7 @@ func (hm *HashMap[K, V]) Clear() {
 	// - initialize with the same size as the last HashMap (however, this would be to much memory, and also,
 	//	 the way I resize it wouldn't make any sense, because the first Remove, would massively downsize it.
 	// - Resize to the original size.
-	hm.Pairs = make([]*linkedList.LinkedList[K, V], 1)
+	hm.Pairs = make([]*doublyLinkedListHM.LinkedList[K, V], 1)
 	hm.Size = 0
 }
 
@@ -241,7 +241,7 @@ func resizeHM[K, V any](hm *HashMap[K, V]) (err error) {
 		newSize = hm.Size * 2
 	}
 
-	newPairs := make([]*linkedList.LinkedList[K, V], newSize)
+	newPairs := make([]*doublyLinkedListHM.LinkedList[K, V], newSize)
 	oldPairs := hm.Pairs
 	hm.Pairs = newPairs
 	hm.Size = 0

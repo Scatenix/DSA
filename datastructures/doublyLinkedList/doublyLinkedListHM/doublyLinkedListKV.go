@@ -1,4 +1,4 @@
-package linkedList
+package doublyLinkedListHM
 
 /*
 This is an adjusted doubly linked list wit key and value field for hash maps by altering it to fit better in a hash map.

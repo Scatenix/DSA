@@ -1,7 +1,7 @@
 package hashMap
 
 import (
-	linkedList "dsa/datastructures/linkedList/linkedListHM"
+	"dsa/datastructures/doublyLinkedList/doublyLinkedListHM"
 	"dsa/util/sugar"
 	"reflect"
 	"testing"
@@ -16,25 +16,25 @@ We only want to know if all the key-value pairs are present, but do not care and
 // Hint for this function: linked lists must be constructed backwards, because the push function is always inserting at head.
 // This is done to avoid needing a tail without losing performance.
 // Ordering is completely irrelevant for a hashmap.
-func ll[K any, V any](keys []K, vals []V) *linkedList.LinkedList[K, V] {
+func ll[K any, V any](keys []K, vals []V) *doublyLinkedListHM.LinkedList[K, V] {
 	// Hint: if valls is nil then len(vals) == 0 is true
 	// This means, the vals == nil check MUST be before the check for an empty list
 	if keys == nil {
 		var key K
 		var val V
-		return &linkedList.LinkedList[K, V]{
-			Head: &linkedList.Node[K, V]{key, val, nil, nil},
+		return &doublyLinkedListHM.LinkedList[K, V]{
+			Head: &doublyLinkedListHM.Node[K, V]{key, val, nil, nil},
 			Size: 1,
 		}
 	} else if len(keys) == 0 {
-		return &linkedList.LinkedList[K, V]{Head: nil, Size: 0}
+		return &doublyLinkedListHM.LinkedList[K, V]{Head: nil, Size: 0}
 	}
 
-	node := &linkedList.Node[K, V]{keys[len(keys)-1], vals[len(vals)-1], nil, nil}
-	ll := &linkedList.LinkedList[K, V]{node, uint(len(keys))}
+	node := &doublyLinkedListHM.Node[K, V]{keys[len(keys)-1], vals[len(vals)-1], nil, nil}
+	ll := &doublyLinkedListHM.LinkedList[K, V]{node, uint(len(keys))}
 
 	for i := len(keys) - 2; i > -1; i-- {
-		newNode := &linkedList.Node[K, V]{keys[i], vals[i], nil, node}
+		newNode := &doublyLinkedListHM.Node[K, V]{keys[i], vals[i], nil, node}
 		node.Next = newNode
 		node = newNode
 	}
@@ -115,16 +115,16 @@ func TestHashMap_Clear(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"empty map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{nil}, 0}, // Putting nil in ll slice because I clear maps to have a length 1
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{nil}, 0}, // Putting nil in ll slice because I clear maps to have a length 1
 		},
 		{
 			"filled map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{1}),
 				ll[int, int]([]int{2, 3}, []int{2, 3}),
 			}, 3},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{nil}, 0}, // Putting nil in ll slice because I clear maps to have a length 1
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{nil}, 0}, // Putting nil in ll slice because I clear maps to have a length 1
 		},
 	}
 	for _, tt := range tests {
@@ -153,19 +153,19 @@ func TestHashMap_ContainsKey(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			args[int]{1},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			false,
 		},
 		{
 			"not found",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args[int]{4},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -173,12 +173,12 @@ func TestHashMap_ContainsKey(t *testing.T) {
 		},
 		{
 			"found",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args[int]{1},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -189,7 +189,7 @@ func TestHashMap_ContainsKey(t *testing.T) {
 		{
 			// My hashing function does not support values of type channel
 			"test error",
-			&HashMap[chan int, chan int]{[]*linkedList.LinkedList[chan int, chan int]{
+			&HashMap[chan int, chan int]{[]*doublyLinkedListHM.LinkedList[chan int, chan int]{
 				ll[chan int, chan int]([]chan int{}, []chan int{}),
 			}, 1},
 			args[chan int]{nil},
@@ -235,19 +235,19 @@ func TestHashMap_ContainsVal(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			args{1},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			false,
 		},
 		{
 			"not found",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args{2},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -255,12 +255,12 @@ func TestHashMap_ContainsVal(t *testing.T) {
 		},
 		{
 			"found",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args{6},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -295,19 +295,19 @@ func TestHashMap_Get(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			args[int]{1},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			nil,
 		},
 		{
 			"not found",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args[int]{4},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -315,12 +315,12 @@ func TestHashMap_Get(t *testing.T) {
 		},
 		{
 			"found",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1, 3}, []int{4, 6}), // hash algorithm will place k,v at index 0.
 				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
 			args[int]{3},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1, 3}, []int{4, 6}),
 				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
@@ -331,7 +331,7 @@ func TestHashMap_Get(t *testing.T) {
 		{
 			// My hashing function does not support values of type channel
 			"test error",
-			&HashMap[chan int, chan int]{[]*linkedList.LinkedList[chan int, chan int]{
+			&HashMap[chan int, chan int]{[]*doublyLinkedListHM.LinkedList[chan int, chan int]{
 				ll[chan int, chan int]([]chan int{}, []chan int{}),
 			}, 1},
 			args[chan int]{nil},
@@ -381,19 +381,19 @@ func TestHashMap_GetKey(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			args{1},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			nil,
 		},
 		{
 			"not found",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
 			args{2},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -401,12 +401,12 @@ func TestHashMap_GetKey(t *testing.T) {
 		},
 		{
 			"found",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1, 3}, []int{4, 6}), // hash algorithm will place k,v at index 0.
 				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
 			args{6},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1, 3}, []int{4, 6}),
 				ll[int, int]([]int{2}, []int{5}),
 			}, 3},
@@ -438,17 +438,17 @@ func TestHashMap_IsEmpty(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			true,
 		},
 		{
 			"filled map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -478,17 +478,17 @@ func TestHashMap_Keys(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			make([]int, 0),
 		},
 		{
 			"filled map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -519,17 +519,17 @@ func TestHashMap_Values(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"emtpy map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			make([]int, 0),
 		},
 		{
 			"filled map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{4}),
 				ll[int, int]([]int{2, 3}, []int{5, 6}),
 			}, 3},
@@ -562,17 +562,17 @@ func TestNewHashMap(t *testing.T) {
 		{
 			"size 0",
 			args{0},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 		},
 		{
 			"size 1",
 			args{1},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{nil}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{nil}, 0},
 		},
 		{
 			"size 10",
 			args{10},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 			}, 0},
 		},
@@ -603,20 +603,20 @@ func TestHashMap_Insert(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"into empty map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			args[int, int]{1, 2},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
 			1,
 		},
 		{
 			"into map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
 			args[int, int]{3, 4},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1, 3}, []int{2, 4}),
 			}, 2},
 			2,
@@ -624,13 +624,13 @@ func TestHashMap_Insert(t *testing.T) {
 		{
 			"upsize map",
 			// it is important for the test, that the Pairs length starts with 3
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{1}),
 				ll[int, int]([]int{2, 3}, []int{2, 3}),
 				nil,
 			}, 3},
 			args[int, int]{4, 4},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2, 3, 4}, []int{1, 2, 3, 4}),
 			}, 4},
 			6, // we double the array size if it is full, so we need to get a len of 6 here.
@@ -640,7 +640,7 @@ func TestHashMap_Insert(t *testing.T) {
 		{
 			// My hashing function does not support values of type channel
 			"test error",
-			&HashMap[chan int, chan int]{[]*linkedList.LinkedList[chan int, chan int]{
+			&HashMap[chan int, chan int]{[]*doublyLinkedListHM.LinkedList[chan int, chan int]{
 				ll[chan int, chan int]([]chan int{}, []chan int{}),
 			}, 0},
 			args[chan int, chan int]{nil, nil},
@@ -687,29 +687,29 @@ func TestHashMap_Remove(t *testing.T) {
 	tests := []testCase[int, int]{
 		{
 			"empty map",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			args[int]{1},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			nil,
 		},
 		{
 			"remove from map size 1",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
 			args[int]{1},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{}, 0},
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{}, 0},
 			intP(2),
 		},
 		{
 			"remove from map size 4 with ll.Size = 1",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2}, []int{1, 2}),
 				ll[int, int]([]int{4}, []int{4}),
 				ll[int, int]([]int{3}, []int{3}), // need to place value here because hashing will place key 3 at index 2
 			}, 4},
 			args[int]{3},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2}, []int{1, 2}),
 				ll[int, int]([]int{4}, []int{4}),
 			}, 3},
@@ -717,13 +717,13 @@ func TestHashMap_Remove(t *testing.T) {
 		},
 		{
 			"remove from map size 4 with ll.Size > 1",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{3}, []int{3}),
 				ll[int, int]([]int{4}, []int{4}),
 				ll[int, int]([]int{1, 2}, []int{1, 2}), // need to place value here because hashing will place key 2 at index 2
 			}, 4},
 			args[int]{2},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{1}),
 				ll[int, int]([]int{3}, []int{3}),
 				ll[int, int]([]int{4}, []int{4}),
@@ -732,11 +732,11 @@ func TestHashMap_Remove(t *testing.T) {
 		},
 		{
 			"try remove not existing key",
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
 			args[int]{2},
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1}, []int{2}),
 			}, 1},
 			nil,
@@ -744,14 +744,14 @@ func TestHashMap_Remove(t *testing.T) {
 		{
 			"downsize map",
 			// Create an initial HashMap with a Paris array of size 20:
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{3, 4, 5}, []int{3, 4, 5}), // need to place value here because hashing will place key 5 at index 8
 				ll[int, int]([]int{1, 2}, []int{1, 2}),
 				nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, // 18 empty buckets
 			}, 5},
 			args[int]{5},
 			// Create a want to have HashMap with a Pairs array of size 8, because we are sizing down if len(Pairs) / 4 == HashMap.Size to len(Pairs) * 2
-			&HashMap[int, int]{[]*linkedList.LinkedList[int, int]{
+			&HashMap[int, int]{[]*doublyLinkedListHM.LinkedList[int, int]{
 				ll[int, int]([]int{1, 2}, []int{1, 2}),
 				ll[int, int]([]int{3, 4}, []int{3, 4}),
 				nil, nil, nil, nil, nil, nil,
@@ -763,7 +763,7 @@ func TestHashMap_Remove(t *testing.T) {
 		{
 			// My hashing function does not support values of type channel
 			"test error",
-			&HashMap[chan int, chan int]{[]*linkedList.LinkedList[chan int, chan int]{
+			&HashMap[chan int, chan int]{[]*doublyLinkedListHM.LinkedList[chan int, chan int]{
 				ll[chan int, chan int]([]chan int{}, []chan int{}),
 			}, 1},
 			args[chan int]{nil},
