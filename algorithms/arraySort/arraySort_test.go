@@ -43,7 +43,7 @@ func TestSortAlgorithmsPanic(t *testing.T) {
 		// This was the best way I found to test different sorting algorithms with one test function.
 		// Would be a bit less verbose if the functions were not generic.
 		{"BubbleSort", func(A []int, comp func(a, b int) int) []int { return BubbleSort(A, comp) }},
-		//{"SelectionSort", func(A []int, comp func(a, b int) int) []int { return SelectionSort(A, comp) }},
+		{"SelectionSort", func(A []int, comp func(a, b int) int) []int { return SelectionSort(A, comp) }},
 		//{"MergeSort", func(A []int, comp func(a, b int) int) []int { return MergeSort(A, comp) }},
 		//{"QuickSort", func(A []int, comp func(a, b int) int) []int { return QuickSort(A, comp) }},
 	}
@@ -123,12 +123,20 @@ func TestSortAlgorithmsInt(t *testing.T) {
 			},
 			[]int{9, 8, 7, 6, 5, 4, 3, 2, 1, 0},
 		},
+		{
+			"already sorted",
+			args{
+				[]int{0, 1, 2, 3, 3, 3, 4, 5, 5, 6, 7, 8, 9},
+				intComp,
+			},
+			[]int{0, 1, 2, 3, 3, 3, 4, 5, 5, 6, 7, 8, 9},
+		},
 	}
 	funcs := []functions{
 		// This was the best way I found to test different sorting algorithms with one test function.
 		// Would be a bit less verbose if the functions were not generic.
 		{"BubbleSort", func(A []int, comp func(a, b int) int) []int { return BubbleSort(A, comp) }},
-		//{"SelectionSort", func(A []int, comp func(a, b int) int) []int { return SelectionSort(A, comp) }},
+		{"SelectionSort", func(A []int, comp func(a, b int) int) []int { return SelectionSort(A, comp) }},
 		//{"MergeSort", func(A []int, comp func(a, b int) int) []int { return MergeSort(A, comp) }},
 		//{"QuickSort", func(A []int, comp func(a, b int) int) []int { return QuickSort(A, comp) }},
 	}
@@ -199,7 +207,7 @@ func TestSortAlgorithmsString(t *testing.T) {
 		// This was the best way I found to test different sorting algorithms with one test function.
 		// Would be a bit less verbose if the functions were not generic.
 		{"BubbleSort", func(A []string, comp func(a, b string) int) []string { return BubbleSort(A, comp) }},
-		//{"SelectionSort", func(A []string, comp func(a, b string) int) []string { return SelectionSort(A, comp) }},
+		{"SelectionSort", func(A []string, comp func(a, b string) int) []string { return SelectionSort(A, comp) }},
 		//{"MergeSort", func(A []string, comp func(a, b string) int) []string { return MergeSort(A, comp) }},
 		//{"QuickSort", func(A []string, comp func(a, b string) int) []string { return QuickSort(A, comp) }},
 	}
