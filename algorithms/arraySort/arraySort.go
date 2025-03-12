@@ -57,7 +57,7 @@ func SelectionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 
 	for i := 0; i < len(A)-1; i++ {
 		smallest := i
-		for j := i + 1; j < len(A)-1; j++ {
+		for j := i + 1; j < len(A); j++ {
 			if comp(A[j], A[smallest]) < 0 {
 				smallest = j
 			}
@@ -66,6 +66,34 @@ func SelectionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 		tmp := A[i]
 		A[i] = A[smallest]
 		A[smallest] = tmp
+	}
+
+	return A
+}
+
+// InsertionSort
+
+func InsertionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
+	if comp == nil {
+		panic("Provided comparator was nil")
+	}
+
+	// For i = 2 to n:
+	// Set key to A[i], and set j to i − 1.
+	// While j > 0 and A[j] > key, do the following:
+	// Set A[j + 1] to A[j].
+	// Decrement j (i.e., set j to j − 1).
+	// Set A[j + 1] to key.
+
+	// []int{9, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+	for i := 1; i < len(A); i++ {
+		key := A[i]
+		j := i - 1
+		for j >= 0 && comp(A[j], key) > 0 {
+			A[j+1] = A[j]
+			j--
+		}
+		A[j+1] = key
 	}
 
 	return A
