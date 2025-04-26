@@ -3,15 +3,15 @@ package arraySort
 // BubbleSort sorts an array A and returns it as sorted.
 // Sorting operation is done directly on the instance of array A.
 //
-// Runtime: Ω(n), O(N²) (Hint: Omega(n) because of the 'swapped' variable)
+// Runtime: Ω(n), O(n²) (Hint: Ω(n) because of the 'swapped' variable)
 //
 // comp - comparator should return
 //
 // - Equal: 0
 //
-// - Sorted towards A[0]: negative number
+// - Sort a towards A[0]: negative number
 //
-// - Sorted towards A[last]: positive number
+// - Sort a towards A[n]: positive number
 func BubbleSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 	if comp == nil {
 		panic("Provided comparator was nil")
@@ -41,15 +41,15 @@ func BubbleSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 // SelectionSort sorts an array A and returns it as sorted.
 // Sorting operation is done directly on the instance of array A.
 //
-// Runtime: Theta(N²)
+// Runtime: Theta(n²)
 //
 // comp - comparator should return
 //
 // - Equal: 0
 //
-// - Sorted towards A[0]: negative number
+// - Sort a towards A[0]: negative number
 //
-// - Sorted towards A[last]: positive number
+// - Sort a towards A[n]: positive number
 func SelectionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 	if comp == nil {
 		panic("Provided comparator was nil")
@@ -71,21 +71,23 @@ func SelectionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 	return A
 }
 
-// InsertionSort
-
+// InsertionSort sorts an array A and returns it as sorted.
+// Sorting operation is done directly on the instance of array A.
+//
+// Runtime: Runtime: Ω(n), O(n²)
+//
+// comp - comparator should return
+//
+// - Equal: 0
+//
+// - Sort a towards A[0]: negative number
+//
+// - Sort a towards A[n]: positive number
 func InsertionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 	if comp == nil {
 		panic("Provided comparator was nil")
 	}
 
-	// For i = 2 to n:
-	// Set key to A[i], and set j to i − 1.
-	// While j > 0 and A[j] > key, do the following:
-	// Set A[j + 1] to A[j].
-	// Decrement j (i.e., set j to j − 1).
-	// Set A[j + 1] to key.
-
-	// []int{9, 1, 2, 3, 4, 5, 6, 7, 8, 9},
 	for i := 1; i < len(A); i++ {
 		key := A[i]
 		j := i - 1
@@ -98,3 +100,30 @@ func InsertionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 
 	return A
 }
+
+func MergeSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
+	return A
+}
+
+func QuickSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
+	return A
+}
+
+// Runtime: Theta(n log n)
+func HeapSort() {}
+
+// Runtime: Theta(n + k)
+// Works only on Integers
+func CoutingSort() {}
+
+// Runtime: Ω(n log n), O(n²)
+func ShellSort() {}
+
+// Runtime: Theta(n log n)
+func TimSort() {}
+
+// Runtime: Theta(d * (n + b))
+// d: Amount of numbers in the largest number
+// n: number of elements
+// b: base of the numbers (like binary base 2, decimal base 10)
+func RadixSort() {}

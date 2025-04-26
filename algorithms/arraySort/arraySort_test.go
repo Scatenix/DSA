@@ -45,7 +45,7 @@ func TestSortAlgorithmsPanic(t *testing.T) {
 		{"BubbleSort", func(A []int, comp func(a, b int) int) []int { return BubbleSort(A, comp) }},
 		{"SelectionSort", func(A []int, comp func(a, b int) int) []int { return SelectionSort(A, comp) }},
 		{"InsertionSort", func(A []int, comp func(a, b int) int) []int { return InsertionSort(A, comp) }},
-		//{"MergeSort", func(A []int, comp func(a, b int) int) []int { return MergeSort(A, comp) }},
+		{"MergeSort", func(A []int, comp func(a, b int) int) []int { return MergeSort(A, comp) }},
 		//{"QuickSort", func(A []int, comp func(a, b int) int) []int { return QuickSort(A, comp) }},
 	}
 	for _, fn := range funcs {
@@ -147,7 +147,7 @@ func TestSortAlgorithmsInt(t *testing.T) {
 		{"BubbleSort", func(A []int, comp func(a, b int) int) []int { return BubbleSort(A, comp) }},
 		{"SelectionSort", func(A []int, comp func(a, b int) int) []int { return SelectionSort(A, comp) }},
 		{"InsertionSort", func(A []int, comp func(a, b int) int) []int { return InsertionSort(A, comp) }},
-		//{"MergeSort", func(A []int, comp func(a, b int) int) []int { return MergeSort(A, comp) }},
+		{"MergeSort", func(A []int, comp func(a, b int) int) []int { return MergeSort(A, comp) }},
 		//{"QuickSort", func(A []int, comp func(a, b int) int) []int { return QuickSort(A, comp) }},
 	}
 	for _, fn := range funcs {
@@ -160,7 +160,7 @@ func TestSortAlgorithmsInt(t *testing.T) {
 				copy(copyA, tt.args.A)
 				defer sugar.Lite(t, fn.name+": "+tt.name)
 				if gotSorted := fn.fn(copyA, tt.args.comp); !reflect.DeepEqual(gotSorted, tt.wantSorted) {
-					t.Errorf("BubbleSort() = %v, want %v", gotSorted, tt.wantSorted)
+					t.Errorf("SortedArray = %v, want %v", gotSorted, tt.wantSorted)
 				}
 			})
 		}
@@ -221,7 +221,7 @@ func TestSortAlgorithmsString(t *testing.T) {
 		{"BubbleSort", func(A []string, comp func(a, b string) int) []string { return BubbleSort(A, comp) }},
 		{"SelectionSort", func(A []string, comp func(a, b string) int) []string { return SelectionSort(A, comp) }},
 		{"InsertionSort", func(A []string, comp func(a, b string) int) []string { return InsertionSort(A, comp) }},
-		//{"MergeSort", func(A []string, comp func(a, b string) int) []string { return MergeSort(A, comp) }},
+		{"MergeSort", func(A []string, comp func(a, b string) int) []string { return MergeSort(A, comp) }},
 		//{"QuickSort", func(A []string, comp func(a, b string) int) []string { return QuickSort(A, comp) }},
 	}
 	for _, fn := range funcs {
@@ -234,7 +234,7 @@ func TestSortAlgorithmsString(t *testing.T) {
 				copy(copyA, tt.args.A)
 				defer sugar.Lite(t, fn.name+": "+tt.name)
 				if gotSorted := fn.fn(copyA, tt.args.comp); !reflect.DeepEqual(gotSorted, tt.wantSorted) {
-					t.Errorf("BubbleSort() = %v, want %v", gotSorted, tt.wantSorted)
+					t.Errorf("SortedArray = %v, want %v", gotSorted, tt.wantSorted)
 				}
 			})
 		}
