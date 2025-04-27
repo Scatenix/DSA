@@ -102,7 +102,80 @@ func InsertionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 }
 
 func MergeSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
+	if comp == nil {
+		panic("Provided comparator was nil")
+	}
+
+	mergeSortRecurse(A, comp, 0, len(A))
 	return A
+}
+
+func mergeSortRecurse[T any](A []T, comp func(a, b T) int, p, r int) {
+	if p >= r {
+		return
+	}
+	q := (p + r) / 2
+
+	mergeSortRecurse[T](A, comp, p, q)
+	mergeSortRecurse[T](A, comp, q+1, r)
+	mergeSortMerge[T](A, comp, p, q, r)
+}
+
+func mergeSortMerge[T any](A []T, comp func(a, b T) int, p, q, r int) {
+	// This whole stuff with copying arrays to B and C could have been completely avoided if this function takes in the 2 arrays to be merged.
+	// This then means that the mergeSortRecurse function needs to return the array produced by this mergeSortMerge function which then in turn get
+	// passed to this merge function again on the next round as one of the 2 parameters.
+	n1 := q - p + 1
+	n2 := r - q
+
+	B := make([]T, n1)
+	copy(B, A[p:q+1])
+
+	var C []T
+	if r < len(A) {
+		C = make([]T, n2)
+		copy(C, A[q+1:r+1])
+	} else if q+1 < len(A) {
+		C = make([]T, n2-1)
+		copy(C, A[q+1:])
+	}
+
+	b := 0
+	c := 0
+	i := p
+	for b < n1 && c < n2 {
+		// This whole if else else block would be much simpler if it wasn't for the genericnes of the function.
+		res := 0
+		if b < len(B) && c < len(C) {
+			res = comp(B[b], C[c])
+		} else if b >= len(B) {
+			res = 1
+		} else if c >= len(C) {
+			res = -1
+		}
+
+		if res <= 0 {
+			A[i] = B[b]
+			b++
+		} else {
+			A[i] = C[c]
+			c++
+		}
+		i++
+	}
+
+	// next to loops are also a tad easier if I just used the 2 arrays as function parameters instead of the impure function mess.
+	// Copy remaining elements after one of B or C has been emptied
+	for b < n1 && i < len(A) {
+		A[i] = B[b]
+		b++
+		i++
+	}
+	for c < n2 && C != nil && i < len(A) {
+		A[i] = C[c]
+		c++
+		i++
+	}
 }
 
 func QuickSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
