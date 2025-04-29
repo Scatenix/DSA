@@ -9,9 +9,9 @@ package arraySort
 //
 // - Equal: 0
 //
-// - Sort a towards A[0]: negative number
+// - Sort 'a' towards A[0], 'a' before 'b': negative number
 //
-// - Sort a towards A[n]: positive number
+// - Sort 'a' towards A[n], 'a' after 'b': positive number
 func BubbleSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 	if comp == nil {
 		panic("Provided comparator was nil")
@@ -47,9 +47,9 @@ func BubbleSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 //
 // - Equal: 0
 //
-// - Sort a towards A[0]: negative number
+// - Sort 'a' towards A[0], 'a' before 'b': negative number
 //
-// - Sort a towards A[n]: positive number
+// - Sort 'a' towards A[n], 'a' after 'b': positive number
 func SelectionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 	if comp == nil {
 		panic("Provided comparator was nil")
@@ -74,15 +74,15 @@ func SelectionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 // InsertionSort sorts an array A and returns it as sorted.
 // Sorting operation is done directly on the instance of array A.
 //
-// Runtime: Runtime: Ω(n), O(n²)
+// Runtime: Ω(n), O(n²)
 //
 // comp - comparator should return
 //
 // - Equal: 0
 //
-// - Sort a towards A[0]: negative number
+// - Sort 'a' towards A[0], 'a' before 'b': negative number
 //
-// - Sort a towards A[n]: positive number
+// - Sort 'a' towards A[n], 'a' after 'b': positive number
 func InsertionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 	if comp == nil {
 		panic("Provided comparator was nil")
@@ -101,6 +101,77 @@ func InsertionSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 	return A
 }
 
+// MergeSortInt sorts an array A of type int and returns it as sorted.
+// Sorting operation is done on a new array. Space complexity should be 2n (peak memory usage) -> Theta(n)
+// Why not 2n log n? because
+//
+// Using pure functions. A lot simpler implementation than using impure functions in my opinion.
+// Combined with the fact that it is not generic, this should be the easiest possible implementation for merge sort.
+//
+// Runtime: Theta(n log n)
+//
+// comp - comparator should return
+//
+// - Equal: 0
+//
+// - Sort 'a' towards A[0], 'a' before 'b': negative number
+//
+// - Sort 'a' towards A[n], 'a' after 'b': positive number
+func MergeSortInt(A []int) []int {
+	if len(A) <= 1 {
+		return A
+	}
+	q := len(A) / 2
+
+	B := MergeSortInt(A[:q]) // Remember, it is [inclusive:exclusive]
+	C := MergeSortInt(A[q:]) // That's why this is not [q+1:]!!! We did not take q into account yet.
+	return mergeSortIntMerge(B, C)
+}
+
+func mergeSortIntMerge(B, C []int) (A []int) {
+	A = make([]int, len(B)+len(C))
+
+	// indices for A, B and C arrays. Very easy to read imo, even though this is not following naming conventions.
+	a := 0
+	b := 0
+	c := 0
+
+	for b < len(B) && c < len(C) {
+		if B[b] <= C[c] {
+			A[a] = B[b]
+			b++
+		} else {
+			A[a] = C[c]
+			c++
+		}
+		a++
+	}
+
+	for ; b < len(B); b++ {
+		A[a] = B[b]
+		a++
+	}
+	for ; c < len(C); c++ {
+		A[a] = C[c]
+		a++
+	}
+	return A
+}
+
+// MergeSort sorts an array A of generic type and returns it as sorted.
+// Sorting operation is done on a new array. Space complexity should be 2n (peak memory usage) -> Theta(n)
+//
+// Using impure functions. A lot more complicated implementation than using pure functions in my opinion.
+//
+// Runtime: Theta(n log n)
+//
+// comp - comparator should return
+//
+// - Equal: 0
+//
+// - Sort 'a' towards A[0], 'a' before 'b': negative number
+//
+// - Sort 'a' towards A[n], 'a' after 'b': positive number
 func MergeSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
 	if comp == nil {
 		panic("Provided comparator was nil")
@@ -140,9 +211,10 @@ func mergeSortMerge[T any](A []T, comp func(a, b T) int, p, q, r int) {
 		copy(C, A[q+1:])
 	}
 
+	// indices for A, B and C arrays. Very easy to read imo, even though this is not following naming conventions.
+	a := p
 	b := 0
 	c := 0
-	i := p
 	for b < n1 && c < n2 {
 		// This whole if else else block would be much simpler if it wasn't for the genericnes of the function.
 		res := 0
@@ -155,26 +227,26 @@ func mergeSortMerge[T any](A []T, comp func(a, b T) int, p, q, r int) {
 		}
 
 		if res <= 0 {
-			A[i] = B[b]
+			A[a] = B[b]
 			b++
 		} else {
-			A[i] = C[c]
+			A[a] = C[c]
 			c++
 		}
-		i++
+		a++
 	}
 
 	// next to loops are also a tad easier if I just used the 2 arrays as function parameters instead of the impure function mess.
 	// Copy remaining elements after one of B or C has been emptied
-	for b < n1 && i < len(A) {
-		A[i] = B[b]
+	for b < n1 && a < len(A) {
+		A[a] = B[b]
 		b++
-		i++
+		a++
 	}
-	for c < n2 && C != nil && i < len(A) {
-		A[i] = C[c]
+	for c < n2 && C != nil && a < len(A) {
+		A[a] = C[c]
 		c++
-		i++
+		a++
 	}
 }
 

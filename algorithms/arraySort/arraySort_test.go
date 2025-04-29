@@ -148,6 +148,7 @@ func TestSortAlgorithmsInt(t *testing.T) {
 		{"SelectionSort", func(A []int, comp func(a, b int) int) []int { return SelectionSort(A, comp) }},
 		{"InsertionSort", func(A []int, comp func(a, b int) int) []int { return InsertionSort(A, comp) }},
 		{"MergeSort", func(A []int, comp func(a, b int) int) []int { return MergeSort(A, comp) }},
+		{"MergeSortInt", func(A []int, comp func(a, b int) int) []int { return MergeSortInt(A) }},
 		//{"QuickSort", func(A []int, comp func(a, b int) int) []int { return QuickSort(A, comp) }},
 	}
 	for _, fn := range funcs {
@@ -159,6 +160,12 @@ func TestSortAlgorithmsInt(t *testing.T) {
 				copyA := make([]int, len(tt.args.A))
 				copy(copyA, tt.args.A)
 				defer sugar.Lite(t, fn.name+": "+tt.name)
+
+				// Need to skip MergeSortInt for reverse comparator because MergeSortInt does not allow reverse sorting
+				if fn.name == "MergeSortInt" && tt.name == "reverse comparator" {
+					t.Skip()
+				}
+
 				if gotSorted := fn.fn(copyA, tt.args.comp); !reflect.DeepEqual(gotSorted, tt.wantSorted) {
 					t.Errorf("SortedArray = %v, want %v", gotSorted, tt.wantSorted)
 				}
