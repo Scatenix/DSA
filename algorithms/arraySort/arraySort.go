@@ -250,8 +250,37 @@ func mergeSortMerge[T any](A []T, comp func(a, b T) int, p, q, r int) {
 	}
 }
 
-func QuickSort[T any](A []T, comp func(a, b T) int) (sorted []T) {
+func QuickSort[T any](A []T, p, r int, comp func(a, b T) int) (sorted []T) {
+	if comp == nil {
+		panic("Provided comparator was nil")
+	}
+
+	if p >= r {
+		return A
+	}
+
+	q := quickSortPartition(A, p, r, comp)
+	QuickSort[T](A, p, q-1, comp)
+	QuickSort[T](A, q+1, r, comp)
 	return A
+}
+
+func quickSortPartition[T any](A []T, p, r int, comp func(a, b T) int) int {
+	q := p
+	for i := p; i < r; i++ {
+		if comp(A[i], A[r]) <= 0 {
+			tmp := A[i]
+			A[i] = A[q]
+			A[q] = tmp
+			q++
+		}
+	}
+
+	tmp := A[q]
+	A[q] = A[r]
+	A[r] = tmp
+
+	return q
 }
 
 // Runtime: Theta(n log n)

@@ -46,7 +46,7 @@ func TestSortAlgorithmsPanic(t *testing.T) {
 		{"SelectionSort", func(A []int, comp func(a, b int) int) []int { return SelectionSort(A, comp) }},
 		{"InsertionSort", func(A []int, comp func(a, b int) int) []int { return InsertionSort(A, comp) }},
 		{"MergeSort", func(A []int, comp func(a, b int) int) []int { return MergeSort(A, comp) }},
-		//{"QuickSort", func(A []int, comp func(a, b int) int) []int { return QuickSort(A, comp) }},
+		{"QuickSort", func(A []int, comp func(a, b int) int) []int { return QuickSort(A, 0, len(A)-1, comp) }},
 	}
 	for _, fn := range funcs {
 		for _, tt := range tests {
@@ -149,7 +149,7 @@ func TestSortAlgorithmsInt(t *testing.T) {
 		{"InsertionSort", func(A []int, comp func(a, b int) int) []int { return InsertionSort(A, comp) }},
 		{"MergeSort", func(A []int, comp func(a, b int) int) []int { return MergeSort(A, comp) }},
 		{"MergeSortInt", func(A []int, comp func(a, b int) int) []int { return MergeSortInt(A) }},
-		//{"QuickSort", func(A []int, comp func(a, b int) int) []int { return QuickSort(A, comp) }},
+		{"QuickSort", func(A []int, comp func(a, b int) int) []int { return QuickSort(A, 0, len(A)-1, comp) }},
 	}
 	for _, fn := range funcs {
 		for _, tt := range tests {
@@ -229,7 +229,7 @@ func TestSortAlgorithmsString(t *testing.T) {
 		{"SelectionSort", func(A []string, comp func(a, b string) int) []string { return SelectionSort(A, comp) }},
 		{"InsertionSort", func(A []string, comp func(a, b string) int) []string { return InsertionSort(A, comp) }},
 		{"MergeSort", func(A []string, comp func(a, b string) int) []string { return MergeSort(A, comp) }},
-		//{"QuickSort", func(A []string, comp func(a, b string) int) []string { return QuickSort(A, comp) }},
+		{"QuickSort", func(A []string, comp func(a, b string) int) []string { return QuickSort(A, 0, len(A)-1, comp) }},
 	}
 	for _, fn := range funcs {
 		for _, tt := range tests {
