@@ -268,17 +268,14 @@ func QuickSort[T any](A []T, p, r int, comp func(a, b T) int) (sorted []T) {
 func quickSortPartition[T any](A []T, p, r int, comp func(a, b T) int) int {
 	q := p
 	for i := p; i < r; i++ {
-		if comp(A[i], A[r]) <= 0 {
-			tmp := A[i]
-			A[i] = A[q]
-			A[q] = tmp
+		if comp(A[i], A[r]) <= 0 { // setting the pivot here to the last element in the sub-array
+			A[i], A[q] = A[q], A[i]
 			q++
 		}
 	}
 
-	tmp := A[q]
-	A[q] = A[r]
-	A[r] = tmp
+	// setting the pivot (A[r] to the right position in the end
+	A[q], A[r] = A[r], A[q]
 
 	return q
 }
