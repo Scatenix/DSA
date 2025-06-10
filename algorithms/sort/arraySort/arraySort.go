@@ -280,12 +280,9 @@ func quickSortPartition[T any](A []T, p, r int, comp func(a, b T) int) int {
 	return q
 }
 
-// Runtime: Theta(n log n)
-func HeapSort() {}
-
 // Runtime: Theta(n + k)
 // Works only on Integers
-func CoutingSort() {}
+func CountingSort() {}
 
 // Runtime: Ω(n log n), O(n²)
 func ShellSort() {}

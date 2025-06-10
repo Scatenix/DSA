@@ -27,7 +27,7 @@ Get test coverage with `go test -cover ./...`
 
 ## Testing additions: Sugar
 
-This repository also includes the sugar library, which adds some coloring, time and memory metrics to testing.
-Needs the performance and color library alongside.
+This repository also includes my library 'sugar', which adds some coloring, time and memory metrics to testing.
+Needs the performance and color library alongside. (Currently not yet in any separate repository)
 
 All can be found in the DSA/util directory.
