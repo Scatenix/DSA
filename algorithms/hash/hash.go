@@ -7,20 +7,27 @@ import (
 )
 
 /* NOTE:
-These algorithms are all written by chatGPT, it's hard for me to confirm if they are correct at the moment,
-since actual implementations are often way more complicated because of interface contract reasons and best practices on
-how hashing algorithms should look like, I guess?
+These algorithms are all written by AI for me to study and slightly adjusted (mainly the conversion to a byte array)
+and some comments from my side.
+It's hard for me to confirm if they are correct at the moment,
+since actual implementations are often way more complicated
+because of interface contract reasons, security and other unkown reasons.
+And also my current lack of fully understanding the papers for these hashing algorithms.
 
-Online converters are giving different results for reasons I do not understand. Perhaps because they are taking strings
-as input, whereas I am converting any input into a []byte.
+Online converters are giving different results for reasons I do not fully understand. Perhaps because they are taking strings
+as input, whereas I am converting any input into a []byte to be able to use any data type as input,
+or also because of different undisclosed prime numbers and seeds. 
 
 For this reason, I have not written any tests.
 
 
-However, the results provided are pretty good, especially the Murmur3 implementation seems to have very good distribution.
+However, the results provided are pretty good and definetly usable to proceed with implementing a hash-map.
+Especially the Murmur3 implementation seems to have very good distribution when I tested it, so I use it for my hash-map implementation.
+
+I will revisit hashing algorithms at a later point.
 */
 
-// DJB2 This implementation should be correct, but online converters yield different results, probably due to my input to []byte conversion
+// DJB2 This implementation looks to be correct to my knowledge, but online converters yield different results, probably due to my input to []byte conversion
 func DJB2(input any) (uint32, error) {
 	in, err := convertToByteArray(input)
 	if err != nil {
