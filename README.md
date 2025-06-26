@@ -1,4 +1,4 @@
-# DSA - Datastructures and algorithms
+# DSA - Datastructures and Algorithms
 
 Project to learn & implement datastructures and algorithms with Test-Driven-Development and as close to 100% test coverage as making sense and is possible.
 
@@ -16,7 +16,7 @@ Written in go, because it is simple and has type safety.
 - `playground/` — application entry point with temporary code for quick experiments and manual testing  
 - `util/` — utility functions, including a custom test helper package called `sugar`
 
-## Running algorithms
+## Running the Algorithms
 
 Running and testing the datastructures and algorithms is done via unit tests.
 The `playground` package in this repository is purley to quickly test things with temporary code.
