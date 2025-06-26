@@ -4,8 +4,6 @@ Project to learn & implement datastructures and algorithms with Test-Driven-Deve
 
 Written in go, because it is simple and has type safety.
 
----
-
 ## Tech Stack
 
 - languages: go
@@ -24,8 +22,6 @@ Running and testing the datastructures and algorithms is done via unit tests.
 The `playground` package in this repository is purley to quickly test things with temporary code.
 
 Tests are always located next to the DSA implementation in the same directory.
-
----
 
 ## Testing
 
